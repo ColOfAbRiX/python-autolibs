@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# MIT License
+#
+# Copyright (c) 2017 Fabrizio Colonna <colofabrix@tin.it>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+from __future__ import print_function
+
+import os
+import sys
+
+from cfutils.execute import *
+from cfutils.formatting import *
+from autolibs.config import Config
+from autolibs.repository import RepoInfo
+from autolibs.githooks.packer import precommit as packer
+from autolibs.githooks.ansible import precommit as ansible
+from autolibs.githooks.terraform import precommit as terraform
+
+if __name__ == '__main__':
+    try:
+        config = Config(RepoInfo().repo_base)
+
+        # Ansible GIT hook
+        if os.path.isdir(config.ansible.base_dir(full_path=True)):
+            ansible_result = ansible.pre_commit()
+
+        # Packer GIT hook
+        if os.path.isdir(config.packer.base_dir(full_path=True)):
+            packer_result = packer.pre_commit()
+
+        # Terraform GIT hook
+        if os.path.isdir(config.terraform.base_dir(full_path=True)):
+            terraform_result = terraform.pre_commit()
+
+        if not (ansible_result and packer_result and terraform_result):
+            sys.exit(1)
+
+    except ScriptError as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e.message, file=sys.stderr)
+        sys.exit(1)
+
+    sys.exit(0)
+
+# vim: ft=python:ts=4:sw=4
