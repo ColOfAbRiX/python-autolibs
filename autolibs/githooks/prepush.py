@@ -90,4 +90,21 @@ def pre_push():
 
     return True
 
+
+def main():
+    try:
+        result = pre_push()
+        if not result:
+            sys.exit(1)
+    except ScriptError as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e.message, file=sys.stderr)
+        sys.exit(1)
+
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
+
 # vim: ft=python:ts=4:sw=4

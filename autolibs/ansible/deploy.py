@@ -58,7 +58,7 @@ class DeployConfig:
 
         # Add SSH key if present
         if self.ssh_key:
-                self.common_args += " --private-key %s" % self.ssh_key
+            self.common_args += " --private-key %s" % self.ssh_key
 
         # Inventory
         self.common_args += " -i %s" % self.inventory

@@ -55,11 +55,16 @@ def get_debuglevel(ansible_args):
     return debug_level
 
 
-def main(args, ansible_args):
+def deploy(args, ansible_args):
     # Getting information about the repository and the deployment
-    env         = {}
-    repo        = AnsibleRepo()
-    deploy      = DeployConfig(repo, args.playbook, args.target, args.filter, ansible_args)
+    repo = AnsibleRepo()
+
+    if repo.repo_base is None:
+        print_c("ERROR: ", color="light_red", end='')
+        print("The current directory is not a GIT repository.")
+        sys.exit(1)
+
+    deploy = DeployConfig(repo, args.playbook, args.target, args.filter, ansible_args)
     debug_level = get_debuglevel(ansible_args)
 
     # Warn the user that vault is being used
@@ -67,6 +72,8 @@ def main(args, ansible_args):
         print_c("Found encrypted files, vault password needed.", color="yellow")
         if deploy.vault_file:
             print_c("Vault password found in: \"%s\"." % deploy.vault_file, color="green")
+
+    env = {}
 
     # Warn the user we're in check mode
     if '--check' in ansible_args:
@@ -104,7 +111,8 @@ def main(args, ansible_args):
         if status > 0:
             sys.exit(1)
 
-if __name__ == '__main__':
+
+def main():
     print_c("Ansible Deployment Wrapper v2.2.1\n", color="white")
 
     parser = argparse.ArgumentParser(
@@ -158,12 +166,16 @@ if __name__ == '__main__':
     args, others = parser.parse_known_args()
 
     try:
-        main(args, others)
+        deploy(args, others)
         sys.exit(0)
 
     except ScriptError as e:
         print_c("ERROR! ", color="light_red", file=sys.stderr)
         print(e.message, file=sys.stderr)
         sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4

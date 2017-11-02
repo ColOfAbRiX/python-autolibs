@@ -76,13 +76,35 @@ def known_arguments(args):
     }
 
 
-def main(args):
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        'current_word',
+        action='store',
+        type=int,
+        help="Index of the current word being edited."
+    )
+    parser.add_argument(
+        'words',
+        action='store',
+        nargs='*',
+        help="List of all the words in the command line."
+    )
+
+    args = parser.parse_args()
+
     result = []
     try:
         repo_info = AnsibleRepo()
-        inventory_base = paths_full(repo_info.repo_base, repo_info.inventory_base)
     except ScriptError:
         sys.exit(0)
+
+    # Don't output anything if we're not in a repository
+    if repo_info.repo_base is None:
+        return
+
+    inventory_base = paths_full(repo_info.repo_base, repo_info.inventory_base)
 
     known = known_arguments(args)
     try:
@@ -110,28 +132,10 @@ def main(args):
     # Output
     print('\n'.join(result))
 
+    sys.exit(0)
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        'current_word',
-        action='store',
-        type=int,
-        help="Index of the current word being edited."
-    )
-    parser.add_argument(
-        'words',
-        action='store',
-        nargs='*',
-        help="List of all the words in the command line."
-    )
-
-    #try:
-    main(parser.parse_args())
-    #except:
-    #    pass
-
-    sys.exit(0)
+    main()
 
 # vim: ft=python:ts=4:sw=4

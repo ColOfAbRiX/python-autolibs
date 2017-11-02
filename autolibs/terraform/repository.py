@@ -31,7 +31,7 @@ import json
 import config
 import argparse
 
-from cfutils.gitutils import get_git_root
+from cfutils.gitutils import *
 
 class TerraformRepo:
     """
@@ -39,8 +39,13 @@ class TerraformRepo:
     """
 
     def __init__(self, repo_base=None):
+        if not is_git_repo(repo_base):
+            self.repo_base = None
+            return
+
         if repo_base is None:
             repo_base = get_git_root()
+
         self.repo_base = repo_base
         self._config = config.TerraformConfig(self.repo_base)
         self.base = os.path.join(self.repo_base, self._config.base_dir())

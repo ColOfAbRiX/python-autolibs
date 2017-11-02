@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/bin/bash
 #
 # MIT License
 #
-# Copyright (c) 2017 Fabrizio Colonna <colofabrix@tin.it>
+# Copyright (c) 2016 Fabrizio Colonna <colofabrix@tin.it>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +22,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+# deploy-register - Autocompletion for the "deploy" script.
+# This script must be loaded with: "source deploy-register"
+#
 
-from __future__ import print_function
+##
+## Autocomplete function
+__deploy_complete() {
+    SUPPORT_SCRIPT="support-deploy"
+    which "$SUPPORT_SCRIPT" > /dev/null 2>&1 || exit 1
 
-import sys
+    local list="$(${SUPPORT_SCRIPT} "${COMP_CWORD}" -- "${COMP_WORDS[@]}")"
+    local current_word="${COMP_WORDS[COMP_CWORD]}"
 
-from cfutils.execute import *
-from cfutils.formatting import *
-from autolibs.githooks.commitmsg import commit_msg
+    COMPREPLY=($(compgen -W "$list" -- "$current_word"))
+}
 
+complete -F __deploy_complete "deploy"
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print_c("COMMIT ERROR - Wrong parameters from GIT", color="light_red", file=sys.stderr)
-        exit(1)
-
-    # Read commit message
-    with open(sys.argv[1]) as f:
-        text = f.read().strip()
-
-    try:
-        result = commit_msg(text)
-        if not result:
-            sys.exit(1)
-    except ScriptError as e:
-        print_c("ERROR! ", color="light_red", file=sys.stderr)
-        print(e.message, file=sys.stderr)
-        sys.exit(1)
-
-    sys.exit(0)
-
-# vim: ft=python:ts=4:sw=4
+# vim: ft=sh:ts=4:sw=4

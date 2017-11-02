@@ -22,38 +22,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
-from __future__ import print_function
-
-import sys
-import json
-import argparse
-
-
-def get(raw_data):
-    """
-    Returns information about the CentOS image to download
-    """
-    return {
-      "image_name": "CentOS-7.3.1611-x86_64",
-      "iso_url": "http://mirror.as29550.net/mirror.centos.org/7/isos/x86_64/CentOS-7-x86_64-DVD-1611.iso",
-      "iso_checksum": "c455ee948e872ad2194bdddd39045b83634e8613249182b88f549bb2319d97eb"
-    }
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'state_file',
-        action='store',
-        default=None,
-        help="Target state file."
-    )
-    args = parser.parse_args()
-
-    result = get({})
-    print(json.dumps(result, sort_keys=True, indent=2, separators=(',', ': ')))
-
-    sys.exit(0)
+from .packer import *
+from .ansible import *
 
 # vim: ft=python:ts=4:sw=4

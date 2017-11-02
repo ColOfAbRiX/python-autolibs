@@ -193,4 +193,29 @@ def commit_msg(commit_msg):
 
     return True
 
+
+def main():
+    if len(sys.argv) != 2:
+        print_c("COMMIT ERROR - Wrong parameters from GIT", color="light_red", file=sys.stderr)
+        exit(1)
+
+    # Read commit message
+    with open(sys.argv[1]) as f:
+        text = f.read().strip()
+
+    try:
+        result = commit_msg(text)
+        if not result:
+            sys.exit(1)
+    except ScriptError as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e.message, file=sys.stderr)
+        sys.exit(1)
+
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
+
 # vim: ft=python:ts=4:sw=4

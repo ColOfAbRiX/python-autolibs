@@ -22,56 +22,50 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 from __future__ import print_function
 
+import os
 import sys
-import json
-import argparse
-import tempfile
 
-from autolibs.packer import *
-from autolibs.repository import *
+from cfutils.execute import *
+from cfutils.formatting import *
+from autolibs.config import Config
+from packer import precommit as packer
+from autolibs.repository import RepoInfo
+from ansible import precommit as ansible
+from terraform import precommit as terraform
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'environment',
-        action='store',
-        default=None,
-        help="Target environment."
-    )
-    parser.add_argument(
-        'aws_region',
-        action='store',
-        default=None,
-        help="Target AWS region."
-    )
-    parser.add_argument(
-        'packer_user',
-        action='store',
-        nargs='?',
-        default='packer',
-        help="User used by packer."
-    )
-    args = parser.parse_args()
 
-    repo = RepoInfo()
+def main():
+    try:
+        config = Config(RepoInfo().repo_base)
 
-    # Read all raw data
-    state_file = repo.terraform.state_file(args.environment)
-    with open(state_file) as data_file:
-        raw_data = json.load(data_file)
+        # Ansible GIT hook
+        if os.path.isdir(config.ansible.base_dir(full_path=True)):
+            ansible_result = ansible.pre_commit()
 
-    variables = {}
+        # Packer GIT hook
+        if os.path.isdir(config.packer.base_dir(full_path=True)):
+            packer_result = packer.pre_commit()
 
-    variables.update(credentials.get(raw_data, args.aws_region, args.packer_user))
-    variables.update(config_minimal.get(raw_data))
-    variables.update(centos_release.get(raw_data))
+        # Terraform GIT hook
+        if os.path.isdir(config.terraform.base_dir(full_path=True)):
+            terraform_result = terraform.pre_commit()
 
-    with tempfile.TemporaryFile(dir=repo.packer.image_base("centos7-aws-minimal")) as var_file:
-        json.dump(variables, var_file)
+        if not (ansible_result and packer_result and terraform_result):
+            sys.exit(1)
+
+    except ScriptError as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e.message, file=sys.stderr)
+        sys.exit(1)
 
     sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4

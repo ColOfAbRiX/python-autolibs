@@ -36,7 +36,7 @@ from autolibs.ansible.inventory import *
 from autolibs.ansible.repository import *
 
 
-def main(args):
+def inventory(args):
     main_yaml = os.environ.get('INVENTORY_MAIN', "main.yml")
     if args.main is not None:
         main_yaml = args.main
@@ -65,7 +65,7 @@ def main(args):
         p_json(output)
 
 
-if __name__ == '__main__':
+def main():
     # Command line arguments
     parser = argparse.ArgumentParser()
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     )
 
     try:
-        main(parser.parse_args())
+        inventory(parser.parse_args())
 
     except ScriptError as e:
         print_c("ERROR! ", color="light_red", file=sys.stderr)
@@ -113,5 +113,9 @@ if __name__ == '__main__':
         sys.exit(1)
 
     sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4
