@@ -123,6 +123,11 @@ from cfutils.formatting import *
 class YAMLInventory(object):
 
     def __init__(self, yaml_file, override_yaml="", repo_info=AnsibleRepo()):
+        if repo_info.repo_base is None:
+            print_c("ERROR: ", color="light_red", end='')
+            print("The current directory is not a GIT repository.")
+            sys.exit(1)
+
         local_tmp = repo_info.ans_config('defaults', 'local_tmp', '~/.ansible/tmp')
 
         self.ansible_group_list = []

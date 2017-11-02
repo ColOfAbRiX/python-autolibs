@@ -35,24 +35,17 @@ from setuptools.command.install import install
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
-        check_call("ln -fs /usr/bin/register-deploy /etc/profile.d/register-deploy.sh".split())
-        check_call("ln -fs /usr/bin/register-vault /etc/profile.d/register-vault.sh".split())
-        check_call("ln -fs /usr/bin/vault /usr/bin/vault-host".split())
-        check_call("ln -fs /usr/bin/vault /usr/bin/vault-group".split())
-        check_call("mkdir -p /opt/autolibs-hooks".split())
-        check_call("cp -f bin/git-hooks/* /opt/autolibs-hooks", shell=True)
+        check_call("ln -fs $(which register-deploy.sh) /etc/profile.d/register-deploy.sh", shell=True)
+        check_call("ln -fs $(which register-vault.sh) /etc/profile.d/register-vault.sh", shell=True)
         install.run(self)
         # To clean the above, run:
         #   rm -f /etc/profile.d/register-deploy.sh
         #   rm -f /etc/profile.d/register-vault.sh
-        #   rm -f /usr/bin/vault-host
-        #   rm -f /usr/bin/vault-group
-        #   rm -rf /opt/autolibs-hooks
 
 
 setup(
     name='autolibs',
-    version='1.0',
+    version='1.1.0',
     author='Fabrizio Colonna',
     author_email='colofabrix@tin.it',
     url='https://github.com/ColOfAbRiX',
@@ -65,22 +58,24 @@ setup(
         'configparser2',
         'ansible >=2.0.0, <2.4.0'
     ],
-    scripts=[
-        # Ansible
-        'bin/deploy',
-        'bin/inventory',
-        'bin/vault',
-        # Ansible autocomplete
-        'bin/ac/register-deploy',
-        'bin/ac/support-deploy.py',
-        'bin/ac/register-vault',
-        'bin/ac/support-vault.py',
-        # Packer
-        'bin/packer_minimal',
-    ],
     cmdclass={
         'install': PostInstallCommand
     },
+    entry_points = {
+        'console_scripts': [
+            'deploy=autolibs.bin.ansible.deploy:main',
+            'inventory=autolibs.bin.ansible.inventory:main',
+            'vault-host=autolibs.bin.ansible.vault:main',
+            'vault-group=autolibs.bin.ansible.vault:main',
+            'packit=autolibs.bin.packer.packit:main',
+            'support-deploy=autolibs.bin.ansible.supportdeploy:main',
+            'support-vault=autolibs.bin.ansible.supportvault:main',
+        ],
+    },
+    scripts=[
+        'bin/register-deploy.sh',
+        'bin/register-vault.sh',
+    ],
 )
 
 # vim: ft=python:ts=4:sw=4

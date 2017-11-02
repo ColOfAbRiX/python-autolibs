@@ -26,6 +26,7 @@
 from __future__ import print_function
 
 import os
+import git
 import config
 import packer
 import ansible
@@ -39,8 +40,15 @@ class RepoInfo:
     """
 
     def __init__(self, repo_base=None):
+        self.repo_base = None
+        self.ansible = None
+        self.packer = None
+        self.terraform = None
+
         if repo_base is None:
             repo_base = get_git_root()
+            if repo_base is None:
+                return
 
         self.repo_base = repo_base
 

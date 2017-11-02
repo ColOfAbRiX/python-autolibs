@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # MIT License
 #
-# Copyright (c) 2016 Fabrizio Colonna <colofabrix@tin.it>
+# Copyright (c) 2017 Fabrizio Colonna <colofabrix@tin.it>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +23,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# vault-register - Autocompletion for the "vault" script.
-# This script must be loaded with: "source vault-register"
-#
 
-##
-## Auto-complete function
-__vault_complete() {
-    SUPPORT_SCRIPT="support-vault.py"
+from .vault import *
+from .deploy import *
+from .inventory import *
+from .supportvault import *
+from .supportdeploy import *
 
-    local list="$(${SUPPORT_SCRIPT} "${COMP_CWORD}" -- "${COMP_WORDS[@]}")"
-    local current_word="${COMP_WORDS[COMP_CWORD]}"
-
-    COMPREPLY=($(compgen -W "$list" -- "$current_word"))
-}
-
-# Register auto complete functions
-complete -F __vault_complete "vault-host"
-complete -F __vault_complete "vault-group"
-
-# vim: ft=sh:ts=4:sw=4
+# vim: ft=python:ts=4:sw=4

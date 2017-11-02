@@ -34,6 +34,7 @@ class PackerConfig:
     """
     def __init__(self, repo_base):
         self._repo_base = repo_base
+
         self.config_file = os.path.join(self._repo_base, self.config_file())
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)

@@ -33,6 +33,7 @@ import os
 import re
 import sys
 import argparse
+
 from cfutils.common import *
 from cfutils.execute import exec_cmd
 from cfutils.formatting import print_c
@@ -55,8 +56,14 @@ def get_debuglevel(ansible_args):
     return debug_level
 
 
-def main(valut_type, action, environment, target, kwargs):
+def vault(valut_type, action, environment, target, kwargs):
     repo_config = AnsibleRepo()
+
+    if repo_config.repo_base is None:
+        print_c("ERROR: ", color="light_red", end='')
+        print("The current directory is not a GIT repository.")
+        sys.exit(1)
+
     debug_level = get_debuglevel(kwargs)
     search_base = os.path.join(repo_config.repo_base, repo_config.inventory_base, environment)
 
@@ -101,7 +108,7 @@ def main(valut_type, action, environment, target, kwargs):
     exit(rc)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
 
     # This command can work differently based on its name.
@@ -143,7 +150,7 @@ if __name__ == '__main__':
         vault_type = args.vault_type
 
     try:
-        main(vault_type, args.vault_action, args.environment, args.target, others)
+        vault(vault_type, args.vault_action, args.environment, args.target, others)
 
     except ScriptError as e:
         print_c("ERROR! ", color="light_red", file=sys.stderr)
@@ -151,5 +158,9 @@ if __name__ == '__main__':
         sys.exit(1)
 
     sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4
