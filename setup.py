@@ -70,6 +70,9 @@ setup(
             'packit=autolibs.bin.packer.packit:main',
             'support-deploy=autolibs.bin.ansible.supportdeploy:main',
             'support-vault=autolibs.bin.ansible.supportvault:main',
+            'pre-commit=autolibs.githooks.precommit:main',
+            'pre-push=autolibs.githooks.prepush:main',
+            'commit-msg=autolibs.githooks.commitmsg:main',
         ],
     },
     scripts=[
