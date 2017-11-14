@@ -40,6 +40,9 @@ def commit_msg(commit_msg):
     # Message content
     #
 
+    # Check only the first line
+    commit_msg = commit_msg.split('\n', 1)[0]
+
     print_c("Commit message checks:")
     print_c("  Check message reference... ".ljust(38), end='')
 
@@ -92,7 +95,7 @@ def commit_msg(commit_msg):
     message_info = {} if message_info is None else message_info.groupdict()
 
     # Check if this is a merge commit
-    is_merge = re.match(r'Merge branch \'\w+\' into \S+', commit_msg) is not None
+    is_merge = re.match(r'^Merge.+branch.+into.+$', commit_msg, re.IGNORECASE) is not None
 
     # Check the text of the commit
     if not message_info and not is_merge:
