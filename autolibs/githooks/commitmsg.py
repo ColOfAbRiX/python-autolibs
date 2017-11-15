@@ -46,41 +46,46 @@ def commit_msg(commit_msg):
     print_c("Commit message checks:")
     print_c("  Check message reference... ".ljust(38), end='')
 
-    # Tickets: "EP01351699: Ticket completed."
-    ticket_token    = build_regex("[A-Z]{{2}}[0-9]{{8}}", pattern_name="ticket")
-    # JIRA Cards: "JIRATAG-10: This is a commit. JIRATAG-10: This is another commit."
-    card_token      = build_regex("[A-Z]+-[0-9]+", pattern_name="card")
-    # Notes: "NOTES: This is a note on the commit."
-    note_token      = build_regex("NOTES?")
-    # Test: "TEST: This is a test."
-    test_token      = build_regex("TESTS?")
-    # Caveats: "CAVEAT: When reading note that something is not perfect."
-    caveat_token    = build_regex("CAV(|EATS?)")
-    # Releases: "v1.2.3: Next release ready."
-    release_version = build_regex("[0-9]+(\.[0-9]+){{,2}}", pattern_name="release_version")
     # Message
-    message         = build_regex("[^\.]{{8,}}")
+    message = build_regex("[^\.]{{8,}}")
 
-    ticket  = build_regex(
+    # Tickets: "EP01351699: Ticket completed."
+    ticket_token = build_regex("[A-Z]{{2}}[0-9]{{8}}", pattern_name="ticket")
+    ticket = build_regex(
         "{ticket_token}:\s+{message}\.",
         pattern_name="ticket_title", ticket_token=ticket_token, message=message
     )
-    card    = build_regex(
+
+    # JIRA Cards: "JIRATAG-10: This is a commit. JIRATAG-10: This is another commit."
+    card_token = build_regex("[A-Z]+-[0-9]+", pattern_name="card")
+    card = build_regex(
         "{card_token}:\s+{message}\.",
         pattern_name="card_name", card_token=card_token, message=message
     )
-    note    = build_regex(
+
+    # Notes: "NOTES: This is a note on the commit."
+    note_token = build_regex("NOTES?")
+    note = build_regex(
         "{note_token}:\s+{message}\.",
         pattern_name="note_content", note_token=note_token, message=message
     )
-    test    = build_regex(
+
+    # Test: "TEST: This is a test."
+    test_token = build_regex("TESTS?")
+    test = build_regex(
         "{test_token}:\s+{message}\.",
         pattern_name="test_content", test_token=test_token, message=message
     )
-    caveat  = build_regex(
+
+    # Caveats: "CAVEAT: When reading note that something is not perfect."
+    caveat_token = build_regex("CAV(|EATS?)")
+    caveat = build_regex(
         "{caveat_token}:\s+{message}\.",
         pattern_name="caveat_content", caveat_token=caveat_token, message=message
     )
+
+    # Releases: "v1.2.3: Next release ready."
+    release_version = build_regex("[0-9]+(\.[0-9]+){{,2}}", pattern_name="release_version")
     release = build_regex(
         "{release_ver}:\s+{message}\.",
         pattern_name="release", release_ver=release_version, message=message
@@ -166,15 +171,15 @@ def commit_msg(commit_msg):
         branch_match = message_match = None
 
         if branch_type in ["feature", "bugfix", "hotfix"]:
-            branch_match  = branch_info['card']
+            branch_match = branch_info['card']
             message_match = message_info['card']
 
         elif branch_type == "ticket":
-            branch_match  = branch_info['ticket']
+            branch_match = branch_info['ticket']
             message_match = message_info['ticket']
 
         elif branch_type == "release":
-            branch_match  = branch_info['release_version']
+            branch_match = branch_info['release_version']
             message_match = message_info['release_version']
 
         if branch_match is None or branch_match != message_match:
