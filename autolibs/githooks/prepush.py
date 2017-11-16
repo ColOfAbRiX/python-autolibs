@@ -32,73 +32,63 @@ import sys
 from cfutils.execute import *
 from cfutils.gitutils import *
 from cfutils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
-from autolibs.ansible.deploy import DeployConfig
+from autolibs.config import Config
+from autolibs.repository import RepoInfo
+from ansible import prepush as ansible
 
 
 def pre_push():
-    print_c("Checking push:")
+
+    print_c(" Repository", color='white')
+    print_c("-" * 40, color='white')
+    print_c("Pre push repository checks:")
 
     # Check we're not committing into protected branches
-    print_c("  Check target branch...".ljust(38), end='')
+    print_c("  Target branch...", end='')
     git_branch = re.search(r'\s*\*\s+(.*)', exec_git('branch'), re.MULTILINE).group(1).strip()
     if git_branch in ['master', 'development', 'devel']:
         print_c("ERROR", color="light_red")
         print(
-            "\n"
-            "PUSH ERROR - Push forbidden on protected branches"
-            "\n"
-            "Protected branches cannot be changed directly,\n"
-            "this is bad practice that can lead to big\n"
-            "problems. These branches can only be pulled from\n"
-            "the remote repository.\n"
-            "\n"
+            "\nPush forbidden on protected branches\n\n"
+            "Protected branches cannot be changed\n"
+            "directly, this is bad practice that can\n"
+            "lead to big problems. These branches\n"
+            "can only be pulled from the remote\n"
+            "repository.\n\n"
             "Aborting the push.\n"
         )
         return False
     print_c("OK", color='light_green')
 
-    repo = AnsibleRepo()
-
-    print_c("\n  GIT will now perform a syntax check of all playbooks. This might take some time.")
-    print("  Found %d playbooks:" % len(repo.playbooks()))
-
-    for i, p in enumerate(repo.playbooks()):
-        print_c("    %d/%d: Checking %s... " % (i + 1, len(repo.playbooks()), p), end='')
-
-        #
-        # FIXME: This is old code and the "all" target is not meaningful anymore
-        # without specifying also the environment.
-        #
-        #deploy = DeployConfig(repo, p, 'all', [])
-        #stdout, stderr, rc = exec_cmd(deploy.deploy_full + " --syntax-check")
-        #if rc != 0:
-        #    print_c("ERROR", color='light_red')
-        #
-        #    print_c(
-        #        "\nPUSH ERROR - Found syntax error while checking playbook \"%s\"" % p,
-        #        color="light_red",
-        #        file=sys.stderr
-        #    )
-        #    print(stderr)
-        #    return False
-
-        print_c("OK", color='light_green')
-
-    print_c("Push status: ", end='')
+    print_c("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
+
+    try:
+        config = Config(RepoInfo().repo_base)
+
+        # Ansible GIT hook
+        if os.path.isdir(config.ansible.base_dir(full_path=True)):
+            if not ansible.pre_push():
+                sys.exit(1)
+
+    except ScriptError as e:
+        print_c("Exception raised", color="light_red")
+        print(e.message)
+        sys.exit(1)
 
     return True
 
 
 def main():
+    print_c("GIT Pre Push Checks\n".center(40), color='white')
     try:
         result = pre_push()
         if not result:
             sys.exit(1)
+
     except ScriptError as e:
-        print_c("ERROR! ", color="light_red", file=sys.stderr)
-        print(e.message, file=sys.stderr)
+        print_c("Exception raised", color="light_red")
+        print(e.message)
         sys.exit(1)
 
     sys.exit(0)

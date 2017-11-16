@@ -27,31 +27,62 @@
 from __future__ import print_function
 
 import re
-import os
 import sys
-import yaml
 
-from cfutils.common import *
+from cfutils.execute import *
 from cfutils.gitutils import *
 from cfutils.formatting import print_c
 from autolibs.ansible.repository import AnsibleRepo
+from autolibs.ansible.deploy import DeployConfig
 
 
-def pre_commit():
+def pre_push():
     repo = AnsibleRepo()
 
-    print_c(" Terraform", color='white')
+    print_c(" Ansible", color='white')
     print_c("-" * 40, color='white')
+    print_c("Pre push repository checks:")
 
-    print("Check status: ", end='')
+    for i, p in enumerate(repo.playbooks()):
+        p_name = p[(len(repo.repo_base) + 1):]
+        print_c("    #%d: Checking %s... " % (i + 1, p_name), end='')
+        #
+        # FIXME: This is old code and the "all" target is not meaningful anymore
+        # without specifying also the environment.
+        #
+        #deploy = DeployConfig(repo, p, 'all', [])
+        #stdout, stderr, rc = exec_cmd(deploy.deploy_full + " --syntax-check")
+        #if rc != 0:
+        #    print_c("ERROR", color='light_red')
+        #
+        #    print_c(
+        #        "\nPUSH ERROR - Found syntax error while checking playbook \"%s\"" % p,
+        #        color="light_red",
+        #        file=sys.stderr
+        #    )
+        #    print(stderr)
+        #    return False
+        print_c("OK", color='light_green')
+
+    print_c("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
 
     return True
 
 
 def main():
-    print_c("GIT Pre Commit Checks\n".center(40), color='white')
-    pre_commit()
+    print_c("GIT Pre Push Checks\n".center(40), color='white')
+    try:
+        result = pre_push()
+        if not result:
+            sys.exit(1)
+
+    except ScriptError as e:
+        print_c("Exception raised", color="light_red")
+        print(e.message)
+        sys.exit(1)
+
+    sys.exit(0)
 
 
 if __name__ == '__main__':
