@@ -40,12 +40,21 @@ from autolibs.ansible.repository import AnsibleRepo
 def pre_commit():
     repo = AnsibleRepo()
 
-    print_c(" Packer\n----------", color='white')
-    print_c("Commit repository checks:")
+    print_c(" Packer", color='white')
+    print_c("-" * 40, color='white')
 
-    print("Commit status: ", end='')
+    print("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
 
     return True
+
+
+def main():
+    print_c("GIT Pre Commit Checks\n".center(40), color='white')
+    pre_commit()
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4

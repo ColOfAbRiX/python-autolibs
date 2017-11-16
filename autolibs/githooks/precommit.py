@@ -38,31 +38,45 @@ from ansible import precommit as ansible
 from terraform import precommit as terraform
 
 
-def main():
+def pre_commit():
+    print_c(" Repository", color='white')
+    print_c("-" * 40, color='white')
+
+    print_c("Pre commit repository checks: ", end='')
+    print_c("OK", color='light_green')
+
+    print_c("Check status: ", end='')
+    print_c("ALLOWED\n", color="light_green")
+
     try:
         config = Config(RepoInfo().repo_base)
 
         # Ansible GIT hook
         if os.path.isdir(config.ansible.base_dir(full_path=True)):
-            ansible_result = ansible.pre_commit()
+            if not ansible.pre_commit():
+                sys.exit(1)
 
         # Packer GIT hook
         if os.path.isdir(config.packer.base_dir(full_path=True)):
-            packer_result = packer.pre_commit()
+            if not packer.pre_commit():
+                sys.exit(1)
 
         # Terraform GIT hook
         if os.path.isdir(config.terraform.base_dir(full_path=True)):
-            terraform_result = terraform.pre_commit()
-
-        if not (ansible_result and packer_result and terraform_result):
-            sys.exit(1)
+            if not terraform.pre_commit():
+                sys.exit(1)
 
     except ScriptError as e:
-        print_c("ERROR! ", color="light_red", file=sys.stderr)
-        print(e.message, file=sys.stderr)
+        print_c("Exception raised", color="light_red")
+        print(e.message)
         sys.exit(1)
 
     sys.exit(0)
+
+
+def main():
+    print_c("GIT Pre Commit Checks\n".center(40), color='white')
+    pre_commit()
 
 
 if __name__ == '__main__':

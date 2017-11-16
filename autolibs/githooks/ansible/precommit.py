@@ -40,11 +40,12 @@ from autolibs.ansible.repository import AnsibleRepo
 def pre_commit():
     repo = AnsibleRepo()
 
-    print_c(" Ansible\n----------", color='white')
+    print_c(" Ansible", color='white')
+    print_c("-" * 40, color='white')
     print_c("Commit repository checks:")
 
     # Check YAML syntax (not Ansible validity, it will take too long)
-    print_c("  Checking YAML syntax... ".ljust(38), end='')
+    print_c("  Checking YAML syntax... ", end='')
     bad_yaml = []
     for root, _, files in os.walk(repo.repo_base, topdown=False):
         if '.git' in root:
@@ -57,21 +58,23 @@ def pre_commit():
     if len(bad_yaml) > 0:
         print_c("ERROR", color='light_red')
         print(
-            "\n"
-            "PUSH ERROR - Bad YAML syntax"
-            "\n"
-            "Some YAML files were found having a bad syntax.\n"
-            "It's not possible to commit incorrect files."
-            "\n"
-            "Bad files:\n  " + '\n  '.join(bad_yaml) + \
-            "\n\nAborting the commit.\n"
+            "\nBad YAML syntax\n\n"
+            "Some YAML files were found having a bad\n"
+            "syntax. It's not possible to commit \n"
+            "incorrect files.\n\n"
+            "Bad files:"
+        )
+        for f in bad_yaml:
+            print("  %s" % f[(len(repo.repo_base) + 1):])
+        print(
+            "\nAborting the commit.\n"
         )
         return False
 
     print_c("OK", color='light_green')
 
     # Check cleartext passwords
-    print_c("  Looking for clear text secrets... ".ljust(38), end='')
+    print_c("  Checking cleartext secrets... ", end='')
     vaults = []
     for root, _, files in os.walk(repo.repo_base, topdown=False):
         if '.git' in root:
@@ -84,22 +87,25 @@ def pre_commit():
     if len(vaults) > 0:
         print_c("ERROR", color='light_red')
         print(
-            "\n"
-            "PUSH ERROR - Clear text secrets"
-            "\n"
-            "The following files need to be encrypted before it's\n"
-            "possibile to commit. Storing a clear text password or\n"
-            "SSH/SSL private keys in GIT is really unsecure!\n"
-            "Only the value \"Passw0rd\" is allowed as a default\n"
-            "password in cleartext.\n"
-            "\n"
-            "Sensitive files:\n  " + '\n  '.join(vaults) +\
-            "\n\nAborting the commit.\n"
+            "\nClear text secrets\n\n"
+            "The following files need to be\n"
+            "encrypted before it's possibile to\n"
+            "commit. Storing a clear text password\n"
+            "or SSH/SSL private keys in GIT is\n"
+            "really unsecure!\n\n"
+            "Only the value \"Passw0rd\" is allowed\n"
+            "as a default password in cleartext.\n\n"
+            "Sensitive files:"
+        )
+        for f in vaults:
+            print("  %s" % f[(len(repo.repo_base) + 1):])
+        print(
+            "\nAborting the commit.\n"
         )
         return False
 
     print_c("OK", color='light_green')
-    print("Commit status: ", end='')
+    print("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
 
     return True
@@ -164,5 +170,14 @@ def contains_cleartext_secrets(filename):
                 return True
 
     return False
+
+
+def main():
+    print_c("GIT Pre Commit Checks\n".center(40), color='white')
+    pre_commit()
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4

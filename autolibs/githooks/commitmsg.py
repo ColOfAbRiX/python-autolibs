@@ -43,8 +43,11 @@ def commit_msg(commit_msg):
     # Check only the first line
     commit_msg = commit_msg.split('\n', 1)[0]
 
+    print_c(" Repository", color='white')
+    print_c("-" * 40, color='white')
+
     print_c("Commit message checks:")
-    print_c("  Check message reference... ".ljust(38), end='')
+    print_c("  Check message reference... ", end='')
 
     # Message
     message = build_regex("[^\.]{{8,}}")
@@ -85,7 +88,7 @@ def commit_msg(commit_msg):
     )
 
     # Releases: "v1.2.3: Next release ready."
-    release_version = build_regex("[0-9]+(\.[0-9]+){{,2}}", pattern_name="release_version")
+    release_version = build_regex("[vV]?[0-9]+(\.[0-9]+){{,2}}", pattern_name="release_version")
     release = build_regex(
         "{release_ver}:\s+{message}\.",
         pattern_name="release", release_ver=release_version, message=message
@@ -106,25 +109,22 @@ def commit_msg(commit_msg):
     if not message_info and not is_merge:
         print_c("ERROR", color="light_red")
         print(
-            "\n"
-            "COMMIT ERROR - Bad commit message"
-            "\n"
-            "The commit message doesn't comply to the required standard.\n"
-            "\n"
-            "Commit messages must be short and clear descriptions of the\n"
-            "changes on the last commit and they must have a reference\n"
-            "to a card or a ticket. Messages can contain notes, caveats,\n"
-            "test comments.\n"
-            "Merge commits are also possibile using the default text given\n"
-            "by GIT."
-            "\n"
+            "\nBad commit message\n\n"
+            "The commit message doesn't comply to\n"
+            "the required standard.\n\n"
+            "Commit messages must be short and clear\n"
+            "descriptions of the changes on the last\n"
+            "commit and they must have a reference\n"
+            "to a card or a ticket. Messages can\n"
+            "contain notes, caveats, test comments.\n\n"
+            "Merge commits are also possibile using\n"
+            "the default text given by GIT.\n\n"
             "Example of valid messages are:\n"
             "  TEST: This is a test.\n"
             "  CARD-10: This is a commit.\n"
             "  AA12345678: Ticket completed.\n"
             "  CAVEAT: Something is not perfect.\n"
-            "  NOTES: This is a note on the commit.\n"
-            "\n"
+            "  NOTES: This is a note on the commit.\n\n"
             "Change the commit message and try again.\n"
         )
         return False
@@ -134,7 +134,7 @@ def commit_msg(commit_msg):
     # GIT Branch
     #
     if not is_merge:
-        print_c("  Check branch name... ".ljust(38), end='')
+        print_c("  Check branch name... ", end='')
 
         git_branch = re.search(r'\s*\*\s+(.*)', exec_git('branch'), re.MULTILINE).group(1).strip()
 
@@ -153,16 +153,14 @@ def commit_msg(commit_msg):
         if not branch_info:
             print_c("ERROR", color="light_red")
             print(
-                "\n"
-                "COMMIT ERROR - Bad branch name"
-                "\n"
-                "The current branch doesn't comply with the required standard.\n"
-                "\n"
-                "The name of the branch must reflect the type of branch and\n"
-                "it must contain a reference to an issue tracker like JIRA,\n"
-                "OTRS or similar.\n"
-                "\n"
-                "Rename the current branch."
+                "\nBad branch name\n\n"
+                "The current branch doesn't comply with\n"
+                "the required standard.\n\n"
+                "The name of the branch must reflect\n"
+                "the type of branch and it must contain\n"
+                "a reference to an issue tracker like\n"
+                "JIRA, OTRS or similar.\n\n"
+                "Rename the current branch.\n"
             )
             return False
 
@@ -185,27 +183,27 @@ def commit_msg(commit_msg):
         if branch_match is None or branch_match != message_match:
             print_c("ERROR", color="light_red")
             print(
-                "\n"
-                "COMMIT ERROR - Bad branch/message reference"
-                "\n"
-                "The reference on the message must match the branch name.\n"
-                "\n"
-                "To have consistent commit messages, it is necessary that the\n"
-                "reference used in the commit message is the same as the name\n"
-                "used in the branch.\n"
-                "\n"
-                "Change the commit message or use a different branch name\n"
+                "\nBad branch/message reference\n\n"
+                "The reference on the message must\n"
+                "match the branch name.\n\n"
+                "To have consistent commit messages, it\n"
+                "is necessary that the reference used\n"
+                "in the commit message is the same as\n"
+                "the name used in the branch.\n\n"
+                "Change the commit message or use a\n"
+                "different branch name.\n"
             )
             return False
         print_c("OK", color='light_green')
+
+    print_c("Check status: ", end='')
+    print_c("ALLOWED\n", color="light_green")
 
     return True
 
 
 def main():
-    if len(sys.argv) != 2:
-        print_c("COMMIT ERROR - Wrong parameters from GIT", color="light_red", file=sys.stderr)
-        exit(1)
+    print_c("GIT Commit Message Checks\n".center(40), color='white')
 
     # Read commit message
     with open(sys.argv[1]) as f:
@@ -216,8 +214,8 @@ def main():
         if not result:
             sys.exit(1)
     except ScriptError as e:
-        print_c("ERROR! ", color="light_red", file=sys.stderr)
-        print(e.message, file=sys.stderr)
+        print_c("Exception raised", color="light_red")
+        print(e.message)
         sys.exit(1)
 
     sys.exit(0)
