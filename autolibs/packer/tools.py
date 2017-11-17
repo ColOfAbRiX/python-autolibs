@@ -96,6 +96,7 @@ def credentials(raw_data, aws_region, packer_user):
 def centos_release(raw_data):
     """
     Returns information about the CentOS image to download
+    TODO: This must not be hard coded
     """
     return {
         "image_name": "CentOS-7.3.1611-x86_64",
@@ -145,6 +146,7 @@ def config_base(raw_data, environment):
 def ansible(raw_data):
     """
     Returns information about the Ansible setup for Packer
+    TODO: This must not be hardcoded
     """
     return {
         "ansible_user": "centos",

@@ -27,24 +27,38 @@
 from __future__ import print_function
 
 import re
+import os
 import sys
+import psutil
 
 from cfutils.execute import *
 from cfutils.gitutils import *
-from cfutils.formatting import print_c
 from autolibs.config import Config
-from autolibs.repository import RepoInfo
+from packer import prepush as packer
+from cfutils.formatting import print_c
 from ansible import prepush as ansible
+from autolibs.repository import RepoInfo
+from terraform import prepush as terraform
 
 
 def pre_push():
-
     print_c(" Repository", color='white')
     print_c("-" * 40, color='white')
     print_c("Pre push repository checks:")
 
+    # If pushing only tags, we skip all other checks
+    print_c("  Pushing tags... ", end='')
+    ppid_cmd = psutil.Process(os.getppid()).cmdline()
+    if ppid_cmd[2] == '--tags':
+        print_c("Tags", color="light_yellow")
+        print_c("Check status: ", end='')
+        print_c("ALLOWED\n", color="light_green")
+        print_c("Skipping other checks because of tags.\n")
+        sys.exit(1)
+    print_c("NO", color='light_green')
+
     # Check we're not committing into protected branches
-    print_c("  Target branch...", end='')
+    print_c("  Target branch... ", end='')
     git_branch = re.search(r'\s*\*\s+(.*)', exec_git('branch'), re.MULTILINE).group(1).strip()
     if git_branch in ['master', 'development', 'devel']:
         print_c("ERROR", color="light_red")
@@ -63,12 +77,24 @@ def pre_push():
     print_c("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
 
+    # We make calls to sub-checks for each component so that there can be
+    # specific checks for Ansible, Terraform and Packer
     try:
         config = Config(RepoInfo().repo_base)
 
         # Ansible GIT hook
         if os.path.isdir(config.ansible.base_dir(full_path=True)):
             if not ansible.pre_push():
+                sys.exit(1)
+
+        # Packer GIT hook
+        if os.path.isdir(config.packer.base_dir(full_path=True)):
+            if not packer.pre_push():
+                sys.exit(1)
+
+        # Terraform GIT hook
+        if os.path.isdir(config.terraform.base_dir(full_path=True)):
+            if not terraform.pre_push():
                 sys.exit(1)
 
     except ScriptError as e:
