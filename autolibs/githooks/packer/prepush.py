@@ -22,44 +22,39 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 from __future__ import print_function
 
+import re
 import os
-import configparser
+import sys
+import yaml
 
-class TerraformConfig:
-    """
-    Terraform Section Configuration
-    """
-    def __init__(self, repo_base):
-        self._repo_base = repo_base
+from cfutils.common import *
+from cfutils.gitutils import *
+from cfutils.formatting import print_c
+from autolibs.ansible.repository import AnsibleRepo
 
-        self.config_file = os.path.join(self._repo_base, self.config_file())
-        self.config = configparser.ConfigParser()
-        self.config.read(self.config_file)
 
-        self._terraform = {}
-        if "terraform" in self.config.sections():
-            self._terraform = self.config['terraform']
+def pre_push():
+    repo = AnsibleRepo()
 
-    @staticmethod
-    def config_file():
-        return ".repoconfig"
+    print_c(" Packer", color='white')
+    print_c("-" * 40, color='white')
 
-    def base_dir(self, full_path=False):
-        base_dir = self._terraform.get("base_dir", "terraform")
-        if full_path:
-            base_dir = os.path.join(self._repo_base, base_dir)
-        return base_dir
+    print("Check status: ", end='')
+    print_c("ALLOWED\n", color="light_green")
 
-    def environments_dir(self, full_path=False):
-        environments_dir = self._terraform.get("environments_dir", "environments")
-        if full_path:
-            environments_dir = os.path.join(self._repo_base, environments_dir)
-        return environments_dir
+    return True
 
-    def state_file(self):
-        return self._terraform.get("state_file", "terraform.tfstate")
+
+def main():
+    print_c("GIT Pre Push Checks\n".center(40), color='white')
+    pre_commit()
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4

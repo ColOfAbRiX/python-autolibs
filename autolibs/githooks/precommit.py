@@ -48,6 +48,8 @@ def pre_commit():
     print_c("Check status: ", end='')
     print_c("ALLOWED\n", color="light_green")
 
+    # We make calls to sub-checks for each component so that there can be
+    # specific checks for Ansible, Terraform and Packer
     try:
         config = Config(RepoInfo().repo_base)
 
