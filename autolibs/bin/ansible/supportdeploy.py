@@ -84,7 +84,7 @@ def list_host_groups(repo_info, playbook, target):
     if rc > 0:
         sys.exit(0)
 
-    return sorted(stdout.split('\n'))
+    return sorted(stdout.replace("\\n", "\n").split('\n'))
 
 
 def list_tags(repo_info, playbook, target):
