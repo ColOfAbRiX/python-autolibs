@@ -53,7 +53,7 @@ def commit_msg(commit_msg):
     message = build_regex("[^\.]{{8,}}")
 
     # Tickets: "EP01351699: Ticket completed."
-    ticket_token = build_regex("[A-Z]{{2}}[0-9]{{8}}", pattern_name="ticket")
+    ticket_token = build_regex("[A-Z]{{1,6}}[0-9]{{4,12}}", pattern_name="ticket")
     ticket = build_regex(
         "{ticket_token}:\s+{message}\.",
         pattern_name="ticket_title", ticket_token=ticket_token, message=message
@@ -88,7 +88,7 @@ def commit_msg(commit_msg):
     )
 
     # Releases: "v1.2.3: Next release ready."
-    release_version = build_regex("[vV]?[0-9]+(\.[0-9]+){{,2}}", pattern_name="release_version")
+    release_version = build_regex("[vV]?[0-9]+(\.[0-9]+){{1,2}}", pattern_name="release_version")
     release = build_regex(
         "{release_ver}:\s+{message}\.",
         pattern_name="release", release_ver=release_version, message=message
@@ -117,7 +117,7 @@ def commit_msg(commit_msg):
             "commit and they must have a reference\n"
             "to a card or a ticket. Messages can\n"
             "contain notes, caveats, test comments.\n\n"
-            "Merge commits are also possibile using\n"
+            "Merge commits are also possible using\n"
             "the default text given by GIT.\n\n"
             "Example of valid messages are:\n"
             "  TEST: This is a test.\n"
