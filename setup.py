@@ -45,7 +45,7 @@ class PostInstallCommand(install):
 
 setup(
     name='autolibs',
-    version='1.2.2',
+    version='1.3.0',
     author='Fabrizio Colonna',
     author_email='colofabrix@tin.it',
     url='https://github.com/ColOfAbRiX',

@@ -35,8 +35,19 @@
 #
 #    ---
 #    # The script can import files and directories, using BASH expansion.
-#    # Imported nested files merges over the parent ones.
+#    # The loading happens sequentially following the list. Nested files are
+#    # merged over the parent ones.
 #    import: [ 'other_file.yml', 'other_dir/', 'wildcard*' ]
+#
+#    # The executables described here will be executed and their YAML output
+#    # be included the same way as with the "import" statement. The loading
+#    # happens sequentially following the list. The items loaded with this
+#    # statement overrides the "import" statement
+#    executables:
+#     - path: inventory-aws
+#       args: ["-r eu-west-2"]
+#       working_dir: "."
+#       environment:  {}
 #
 #    # Hosts section
 #    hosts:
@@ -118,6 +129,7 @@ import StringIO
 import json
 
 from repository import *
+from cfutils.execute import *
 from cfutils.formatting import *
 
 class YAMLInventory(object):
@@ -298,10 +310,12 @@ class YAMLInventory(object):
 
                 # Load interesting keys only, ignore the others
                 imports_list = doc.get("import", []) or []
+                execs_list   = doc.get("executables", []) or []
                 group_list   = doc.get("groups", []) or []
                 host_list    = doc.get("hosts",  []) or []
                 global_vars  = doc.get("vars",   {}) or {}
 
+                # Import from files and directories
                 for import_file in imports_list:
                     import_file = paths_full(self.inventory_base, import_file)
 
@@ -336,6 +350,32 @@ class YAMLInventory(object):
                             host_list   = self._merge_import_objs(host_list, i_hosts)
                             global_vars = merge(global_vars, i_vars)
 
+                # Execute the scripts and include their output
+                for exec_entry in execs_list:
+                    # Working directory
+                    working_dir = exec_entry.get('working_dir', os.getcwd()) or os.getcwd()
+
+                    # Environment variables
+                    env = os.environ.copy()
+                    env.update(exec_entry.get('environment', {}) or {})
+
+                    # Command to execute
+                    args = exec_entry.get('args', []) or []
+                    exec_path = paths_full(os.path.dirname(sys.argv[0]), exec_entry['path'])
+                    cmd = "%s %s" % (exec_path, ' '.join(args))
+
+                    # Execute
+                    stdout, stderr, rc = exec_cmd(cmd, cwd=working_dir, env=env)
+                    if rc != 0:
+                        print(stderr, file=sys.stderr)
+                        continue
+
+                    # Merge recursively the result
+                    i_groups, i_hosts, i_vars = self._load_flat(i, load_list, use_yaml=stdout, is_first=False)
+                    group_list  = self._merge_import_objs(group_list, i_groups)
+                    host_list   = self._merge_import_objs(host_list, i_hosts)
+                    global_vars = merge(global_vars, i_vars)
+
         except (IOError, yaml.YAMLError), exc:
             raise Exception("Error loading file file %s: %s." % (file_path, exc))
 
@@ -356,6 +396,9 @@ class YAMLInventory(object):
 
         if not isinstance(doc.get("import", []) or [], list):
             raise Exception("The key 'import' must be a list, in %s." % file_path)
+
+        if not isinstance(doc.get("executables", []) or [], list):
+            raise Exception("The key 'executables' must be a list, in %s." % file_path)
 
         if not isinstance(doc.get("groups", []) or [], list):
             raise Exception("The key 'groups' must be a list, in %s." % file_path)
