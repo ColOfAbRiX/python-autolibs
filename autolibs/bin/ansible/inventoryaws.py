@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -24,10 +23,44 @@
 # SOFTWARE.
 #
 
-from .config import *
-from .deploy import *
-from .inventory import *
-from .repository import *
-from .inventoryaws import *
+from __future__ import print_function
+
+import boto3
+import argparse
+
+from autolibs.ansible.inventoryaws import *
+
+
+def main():
+    # Command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--regions', '-r',
+        action='store',
+        nargs='?',
+        default="",
+        help="List of regions where to run the inventory."
+    )
+    args = parser.parse_args()
+
+    # Find the list of regions
+    regions = filter(None, args.regions.lower().split(','))
+    if not regions:
+        regions = [x['RegionName'] for x in boto3.client('ec2').describe_regions()['Regions']]
+
+    # Extract the information
+    output = {
+        'hosts': build_hosts(regions=regions),
+        'groups': build_groups(regions=regions),
+        'vars': {
+            'aws': True
+        }
+    }
+
+    p_json(output)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ft=python:ts=4:sw=4
