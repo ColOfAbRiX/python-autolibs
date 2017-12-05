@@ -23,13 +23,67 @@
 # SOFTWARE.
 #
 
+#
+# Custom dynamic inventory script for Ansible that fetches instances from AWS
+#
+# The script scans the AWS regions for started EC2 instances and reads their
+# tags to extract Ansible variables, group membership and other information. The
+# script is designed to work with the other inventory script.
+#
+# The script uses a file named "aws_credentials" to read the AWS credentials for
+# the boto3 library. The file must be present in the current working directory
+# or in the same directory as this script. Also, the file must have a safe
+# permissions of at least 0600.
+#
+# The script recognises the following tags:
+#
+#  Ansible: Must be set to "True" for this script to act on the instance
+#
+#  AnsibleName: Name assigned to the host, e.g. "amdevrabbitmq01"
+#
+#  AnsibleGroups: Comma separated list of the groups where the instance is a
+#    member. E.g. "dev,rabbit_servers,centos_7"
+#
+#  AnsibleVars: A comma separates list of key/value pairs like in the following
+#    example: Var1=Test Var2="Test 2", that will be added as host variables
+#
+#  Environment: if present, the script will add this value as a group membership
+#
+
 from __future__ import print_function
 
 import re
+import os
 import boto3
 import argparse
+import configparser
 
+from stat import *
 from cfutils import *
+
+
+def load_credentials():
+    config = configparser.ConfigParser()
+
+    # Look for the file
+    aws_credentials = os.path.join(os.getcwd(), "aws_credentials")
+    if not os.path.isfile(aws_credentials):
+        aws_credentials = os.path.join(os.path.dirname(sys.argv[0]), "aws_credentials")
+        if not os.path.isfile(aws_credentials):
+            raise Exception("Cannot find file aws_credentials")
+
+    # Ensuring strict permissions
+    if os.stat(aws_credentials).st_mode & (S_IWGRP | S_IWOTH | S_IROTH):
+        raise Exception("The AWS credentials files %s has unsecure permissions." % aws_credentials)
+    if not os.access(aws_credentials, os.R_OK):
+        raise Exception("Cannot open file aws_credentials for reading.")
+
+    # Load and return
+    config.read(aws_credentials)
+    return (
+        config.get('default', 'aws_access_key_id'),
+        config.get('default', 'aws_secret_access_key')
+    )
 
 
 def build_hosts(regions=[]):
@@ -39,7 +93,11 @@ def build_hosts(regions=[]):
     instances = []
 
     for r in regions:
-        ec2 = boto3.resource('ec2', region_name=r)
+        access_key, secret_key = load_credentials()
+
+        ec2 = boto3.resource(
+            'ec2', region_name=r, aws_access_key_id=access_key, aws_secret_access_key=secret_key
+        )
 
         # Collect only instances with tag: Ansible=True
         filters = [
@@ -80,10 +138,6 @@ def build_host_info(instance, region):
     if 'Environment' in tags and tags['Environment'] not in groups:
         groups.append(tags['Environment'])
 
-    # Additional AWS info
-    variables.update({
-    })
-
     # Build and return
     return {
         'name': hostname,
@@ -107,38 +161,5 @@ def build_groups(regions=[]):
             }
         })
     return output
-
-
-def main():
-    # Command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--regions', '-r',
-        action='store',
-        nargs='?',
-        default="",
-        help="List of regions where to run the inventory."
-    )
-    args = parser.parse_args()
-
-    # Find the list of regions
-    regions = filter(None, args.regions.lower().split(','))
-    if not regions:
-        regions = [x['RegionName'] for x in boto3.client('ec2').describe_regions()['Regions']]
-
-    # Extract the information
-    output = {
-        'hosts': build_hosts(regions=regions),
-        'groups': build_groups(regions=regions),
-        'vars': {
-            'aws': True
-        }
-    }
-
-    p_json(output)
-
-
-if __name__ == '__main__':
-    main()
 
 # vim: ft=python:ts=4:sw=4

@@ -65,6 +65,7 @@ setup(
         'console_scripts': [
             'deploy=autolibs.bin.ansible.deploy:main',
             'inventory=autolibs.bin.ansible.inventory:main',
+            'inventory-aws=autolibs.bin.ansible.inventoryaws:main',
             'vault-host=autolibs.bin.ansible.vault:main',
             'vault-group=autolibs.bin.ansible.vault:main',
             'packit=autolibs.bin.packer.packit:main',

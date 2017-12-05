@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# inventory.py
+
 #
 # Custom dynamic inventory script for Ansible that uses YAML to store hosts. The script
 # will first load the file inventories/main.yml from the repository base.
@@ -393,7 +393,6 @@ class YAMLInventory(object):
         """
         Checks the format of each YAML entry, to ensure it's in the correct format
         """
-
         if not isinstance(doc.get("import", []) or [], list):
             raise Exception("The key 'import' must be a list, in %s." % file_path)
 
