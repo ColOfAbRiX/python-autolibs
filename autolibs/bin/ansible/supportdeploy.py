@@ -34,6 +34,7 @@ import glob
 import argparse
 
 from cfutils.execute import *
+from cfutils.formatting import print_c
 from autolibs.ansible.deploy import DeployConfig
 from autolibs.ansible.repository import AnsibleRepo
 
@@ -113,6 +114,8 @@ def main():
     result = []
     try:
         repo_info = AnsibleRepo()
+    except (ValueError, IOError, LookupError) as e:
+        sys.exit(1)
     except ScriptError:
         sys.exit(0)
 

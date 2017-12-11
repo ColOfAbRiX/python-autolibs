@@ -57,14 +57,14 @@ def get_debuglevel(ansible_args):
 
 def deploy(args, ansible_args):
     # Getting information about the repository and the deployment
-    repo = AnsibleRepo()
-
-    if repo.repo_base is None:
-        print_c("ERROR: ", color="light_red", end='')
-        print("The current directory is not a GIT repository.")
+    try:
+        repo = AnsibleRepo()
+        deploy = DeployConfig(repo, args.playbook, args.target, args.filter, ansible_args)
+    except (ValueError, IOError, LookupError) as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e, file=sys.stderr)
         sys.exit(1)
 
-    deploy = DeployConfig(repo, args.playbook, args.target, args.filter, ansible_args)
     debug_level = get_debuglevel(ansible_args)
 
     # Warn the user that vault is being used

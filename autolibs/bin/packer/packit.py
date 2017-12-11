@@ -98,8 +98,15 @@ def main():
     )
     args = parser.parse_args()
 
+    try:
+        terraform_repo = TerraformRepo()
+    except (ValueError, IOError, LookupError) as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(1)
+
     # Read all raw data
-    state_file = TerraformRepo().state_file(args.environment)
+    state_file = terraform_repo.state_file(args.environment)
     with open(state_file) as data_file:
         raw_data = json.load(data_file)
 

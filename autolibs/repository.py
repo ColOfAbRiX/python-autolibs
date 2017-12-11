@@ -31,8 +31,8 @@ import config
 import packer
 import ansible
 import terraform
-
 from cfutils.gitutils import get_git_root
+
 
 class RepoInfo:
     """
@@ -40,20 +40,29 @@ class RepoInfo:
     """
 
     def __init__(self, repo_base=None):
-        self.repo_base = None
-        self.ansible = None
-        self.packer = None
-        self.terraform = None
-
-        if repo_base is None:
+        # Get repository base
+        if repo_base is None and is_git_repo(repo_base):
             repo_base = get_git_root()
-            if repo_base is None:
-                return
-
+        if not is_git_repo(repo_base):
+            raise ValueError("Not a GIT repository: %s" % repo_base)
         self.repo_base = repo_base
 
-        self.ansible = ansible.AnsibleRepo(self.repo_base)
-        self.packer = packer.PackerRepo(self.repo_base)
-        self.terraform = terraform.TerraformRepo(self.repo_base)
+        # Ansible
+        try:
+            self.ansible = ansible.AnsibleRepo(self.repo_base)
+        except LookupError:
+            self.ansible = None
+
+        # Packer
+        try:
+            self.packer = packer.PackerRepo(self.repo_base)
+        except LookupError:
+            self.packer = None
+
+        # Terraform
+        try:
+            self.terraform = terraform.TerraformRepo(self.repo_base)
+        except LookupError:
+            self.terraform = None
 
 # vim: ft=python:ts=4:sw=4
