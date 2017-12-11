@@ -27,33 +27,48 @@ from __future__ import print_function
 
 import os
 import configparser
+from cfutils.gitutils import *
+
 
 class PackerConfig:
     """
     Packer Section Configuration
     """
     def __init__(self, repo_base):
+        if repo_base is None or not is_git_repo(repo_base):
+            raise ValueError("Not a GIT repository: %s" % repo_base)
         self._repo_base = repo_base
 
         self.config_file = os.path.join(self._repo_base, self.config_file())
+
+        # Configuration section
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
+        if "packer" not in self.config.sections():
+            raise LookupError("Packer configuration section doesn't exist in %s." % self.config_file)
 
-        self._packer = {}
-        if "packer" in self.config.sections():
-            self._packer = self.config['packer']
+        self._packer = self.config['packer']
 
     @staticmethod
     def config_file():
+        """
+        Name of the configuration file
+        """
         return ".repoconfig"
 
     def base_dir(self, full_path=False):
+        """
+        Base directory of Packer
+        """
         base_dir = self._packer.get("base_dir", "packer")
         if full_path:
             base_dir = os.path.join(self._repo_base, base_dir)
         return base_dir
 
     def packer_file(self):
+        """
+        Name of the Packer configuration file
+        """
         return self._packer.get("packer_file", "packer.json")
 
 # vim: ft=python:ts=4:sw=4

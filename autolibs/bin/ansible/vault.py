@@ -57,11 +57,11 @@ def get_debuglevel(ansible_args):
 
 
 def vault(valut_type, action, environment, target, kwargs):
-    repo_config = AnsibleRepo()
-
-    if repo_config.repo_base is None:
-        print_c("ERROR: ", color="light_red", end='')
-        print("The current directory is not a GIT repository.")
+    try:
+        repo_config = AnsibleRepo()
+    except (ValueError, IOError, LookupError) as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e, file=sys.stderr)
         sys.exit(1)
 
     debug_level = get_debuglevel(kwargs)
@@ -109,6 +109,8 @@ def vault(valut_type, action, environment, target, kwargs):
 
 
 def main():
+    print_c("Ansible Vault Wrapper\n", color="white")
+
     parser = argparse.ArgumentParser()
 
     # This command can work differently based on its name.

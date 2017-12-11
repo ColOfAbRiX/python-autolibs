@@ -31,6 +31,7 @@ import ansible
 import terraform
 import configparser
 
+
 class Config:
     """
     Repository Configuration
@@ -43,9 +44,23 @@ class Config:
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
-        self.ansible = ansible.AnsibleConfig(self._repo_base)
-        self.packer = packer.PackerConfig(self._repo_base)
-        self.terraform = terraform.TerraformConfig(self._repo_base)
+        # Ansible
+        try:
+            self.ansible = ansible.AnsibleConfig(self._repo_base)
+        except LookupError:
+            self.ansible = None
+
+        # Packer
+        try:
+            self.packer = packer.PackerConfig(self._repo_base)
+        except LookupError:
+            self.packer = None
+
+        # Terraform
+        try:
+            self.terraform = terraform.TerraformConfig(self._repo_base)
+        except LookupError:
+            self.terraform = None
 
     @staticmethod
     def config_file():

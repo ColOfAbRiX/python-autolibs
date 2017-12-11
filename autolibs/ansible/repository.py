@@ -47,19 +47,24 @@ class AnsibleRepo:
     """
 
     def __init__(self, repo_base=None):
-        if not is_git_repo(repo_base):
-            self.repo_base = None
-            return
-
-        if repo_base is None:
+        # Get repository base
+        if repo_base is None and is_git_repo(repo_base):
             repo_base = get_git_root()
+        if not is_git_repo(repo_base):
+            raise ValueError("Not a GIT repository: %s" % repo_base)
+        self.repo_base = repo_base
 
-        self._config = config.AnsibleConfig(repo_base)
-        self.repo_base = os.path.join(repo_base, self._config.base_dir())
+        # Load configuration
+        self._config = config.AnsibleConfig(self.repo_base)
+
+        # Base path of Packer
+        self.base = os.path.join(self.repo_base, self._config.base_dir())
+        if not os.path.isdir(self.base):
+            raise IOError("Base Ansible directory doesn't exist in %s" % self.base)
 
         # Change the working directory to the root of the repository
         old_cwd = os.getcwd()
-        os.chdir(self.repo_base)
+        os.chdir(self.base)
         self._p, _ = C.load_config_file()
         os.chdir(old_cwd)
 
@@ -71,8 +76,8 @@ class AnsibleRepo:
         self._vaults    = None
 
         # Base paths
-        self.roles_base     = paths_full(self.repo_base, "roles")
-        self.playbooks_base = paths_full(self.repo_base, self._config.playbooks_dir())
+        self.roles_base     = paths_full(self.base, "roles")
+        self.playbooks_base = paths_full(self.base, self._config.playbooks_dir())
         self.inventory_base = self.ans_config('defaults', 'inventory', '/etc/ansible/hosts')
 
         # Others
@@ -121,7 +126,7 @@ class AnsibleRepo:
 
         self._vaults = []
 
-        for root, _, files in os.walk(self.repo_base, topdown=False):
+        for root, _, files in os.walk(self.base, topdown=False):
             if '.git' in root:
                 continue
 

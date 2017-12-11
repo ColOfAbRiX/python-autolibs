@@ -125,17 +125,18 @@ from __future__ import print_function
 import glob
 import time
 import copy
-import StringIO
 import json
-
+import StringIO
 from repository import *
 from cfutils.execute import *
 from cfutils.formatting import *
 
+
 class YAMLInventory(object):
 
-    def __init__(self, yaml_file, override_yaml="", repo_info=AnsibleRepo()):
-        if repo_info.repo_base is None:
+    def __init__(self, yaml_file, override_yaml="", repo_info=None):
+        repo_info = AnsibleRepo() if repo_info is None else repo_info
+        if repo_info.base is None:
             print_c("ERROR: ", color="light_red", end='')
             print("The current directory is not a GIT repository.")
             sys.exit(1)
@@ -242,8 +243,8 @@ class YAMLInventory(object):
         search_in = [
             paths_full(os.path.dirname(main_yaml_file)),
             paths_full(os.path.dirname(sys.argv[0])),
-            paths_full(repo_info.repo_base, repo_info.inventory_base),
-            paths_full(repo_info.repo_base)
+            paths_full(repo_info.base, repo_info.inventory_base),
+            paths_full(repo_info.base)
         ] + opt_paths
 
         for where in search_in:
