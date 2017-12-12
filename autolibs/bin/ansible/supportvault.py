@@ -49,7 +49,7 @@ def list_actions():
 def list_environments(repo_info):
     """ List what's available in the inventory path. """
     return os.listdir(
-        paths_full(repo_info.repo_base, repo_info.inventory_base)
+        paths_full(repo_info.base, repo_info.inventory_base)
     )
 
 
@@ -104,10 +104,10 @@ def main():
         sys.exit(0)
 
     # Don't output anything if we're not in a repository
-    if repo_info.repo_base is None:
+    if repo_info.base is None:
         return
 
-    inventory_base = paths_full(repo_info.repo_base, repo_info.inventory_base)
+    inventory_base = paths_full(repo_info.base, repo_info.inventory_base)
 
     known = known_arguments(args)
     try:
