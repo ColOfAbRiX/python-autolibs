@@ -65,7 +65,7 @@ def vault(valut_type, action, environment, target, kwargs):
         sys.exit(1)
 
     debug_level = get_debuglevel(kwargs)
-    search_base = os.path.join(repo_config.repo_base, repo_config.inventory_base, environment)
+    search_base = os.path.join(repo_config.base, repo_config.inventory_base, environment)
 
     vault_cmd = "%s %s" % (repo_config.ansible_vault, action)
     vault_file = os.path.join(search_base, repo_config.vault_file)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -151,21 +150,18 @@ class YAMLInventory(object):
         self.inventory_base     = self.detect_inventory_base(yaml_file, repo_info)
         self.yaml_file          = yaml_file
         self.cache_file         = paths_full(local_tmp, 'inventory-cache.yml')
-        self.CACHE_EXPIRE       = 300
+        self.CACHE_EXPIRE       = 180
         self.override_yaml      = override_yaml
 
         # Load from cache only if the script has been called from the same process or
-        # the cache is older than 30 minutes (inventory changes are not frequent)
+        # the cache is older than X minutes (inventory changes are not frequent)
         load_cache = os.path.exists(self.cache_file) and \
                      (time.time() - os.path.getmtime(self.cache_file)) < self.CACHE_EXPIRE
-
-        # Cache is permanently disabled (not much benefits from it right now)
-        load_cache = False
 
         if load_cache:
             try:
                 # Loads the data from the cache file
-                load_cache = not self._load_cache()
+                load_cache = self._load_cache()
             except (ValueError, IOError):
                 # Cache is disabled if there are issues loading it
                 load_cache = False
@@ -174,7 +170,6 @@ class YAMLInventory(object):
 
         if not load_cache:
             """ Loading steps """
-
             # Load all the YAML files, starting with the main file
             self._load_yaml()
 
@@ -527,20 +522,28 @@ class YAMLInventory(object):
         with open(self.cache_file, 'r') as f:
             cache = json.load(f)
 
-        self.ansible_group_list = cache.get('group_list', {})
-        self.ansible_host_list  = cache.get('host_list', {})
+        self.ansible_group_list = cache.get('ansible_group_list', {})
+        self.ansible_host_list = cache.get('ansible_host_list', {})
+        self.group_list = cache.get('group_list', {})
+        self.host_list = cache.get('host_list', {})
         self.global_vars = cache.get('global_vars', {})
 
         # Returns true if all data has been loaded
-        return self.ansible_group_list and self.ansible_host_list and self.global_vars
+        return self.ansible_group_list and \
+            self.ansible_host_list and \
+            self.global_vars and \
+            self.group_list and \
+            self.host_list
 
     def _save_cache(self):
         """
         Saves the data in the cache
         """
         data = {
-            'group_list':  self.ansible_group_list,
-            'host_list':   self.ansible_host_list,
+            'ansible_group_list': self.ansible_group_list,
+            'ansible_host_list': self.ansible_host_list,
+            'group_list': self.group_list,
+            'host_list': self.host_list,
             'global_vars': self.global_vars
         }
 

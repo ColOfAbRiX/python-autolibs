@@ -102,7 +102,7 @@ def deploy(args, ansible_args):
         switch_cmd(
             deploy.deploy_full,
             run_as=repo.run_as,
-            cwd=repo.repo_base,
+            cwd=repo.base,
             env=env
         )
     else:

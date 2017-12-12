@@ -73,7 +73,7 @@ def list_playbooks(repo_info):
 
 def list_environments(repo_info, playbook):
     """ List what's available in the inventory path. """
-    file_list = glob.glob(paths_full(repo_info.repo_base, repo_info.inventory_base, "*"))
+    file_list = glob.glob(paths_full(repo_info.base, repo_info.inventory_base, "*"))
     return [os.path.basename(f) for f in file_list]
 
 
@@ -82,10 +82,10 @@ def list_host_groups(repo_info, playbook, target):
     deploy_info = DeployConfig(repo_info, playbook, target, "")
 
     stdout, stderr, rc = exec_cmd("%s --list-hosts=name --list-groups=name" % deploy_info.inventory)
-    if rc > 0:
-        sys.exit(0)
+    if rc > 0 or stdout.strip() == "":
+        return []
 
-    return sorted(stdout.replace("\\n", "\n").split('\n'))
+    return sorted(stdout.split('\n'))
 
 
 def list_tags(repo_info, playbook, target):
@@ -115,12 +115,12 @@ def main():
     try:
         repo_info = AnsibleRepo()
     except (ValueError, IOError, LookupError) as e:
-        sys.exit(1)
+        return
     except ScriptError:
-        sys.exit(0)
+        return
 
     # Don't output anything if we're not in a repository
-    if repo_info.repo_base is None:
+    if repo_info.base is None:
         return
 
     # First parameter, playbook
@@ -136,7 +136,7 @@ def main():
     elif args.current_word >= 3:
         playbook, environment = args.words[1:3]
         previous_word = args.words[args.current_word - 1]
-        current_word = args.words[args.current_word]
+        current_word = args.words[args.current_word] if len(args.words) > 3 else ""
 
         if previous_word in ['-t', '--tags', '--skip-tags']:
             result = list_tags(repo_info, playbook, environment)

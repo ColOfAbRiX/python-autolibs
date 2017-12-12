@@ -55,9 +55,17 @@ def inventory(args):
 
         elif args.list_hosts != '' or args.list_groups != '':
             inventory = YAMLInventory(main_yaml, override_yaml=override)
+
+            # Display hosts
             if args.list_hosts != '':
+                print(inventory.get_hosts(args.list_hosts))
+            elif args.list_hosts is None:
                 p_json(inventory.get_hosts(args.list_hosts))
+
+            # Display groups
             if args.list_groups != '':
+                print(inventory.get_groups(args.list_groups))
+            elif args.list_groups is None:
                 p_json(inventory.get_groups(args.list_groups))
 
         else:
