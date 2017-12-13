@@ -36,16 +36,20 @@ class PackerRepo:
     """
 
     def __init__(self, repo_base=None):
-        if not is_git_repo(repo_base):
-            self.repo_base = None
-            return
-
-        if repo_base is None:
+        # Get repository base
+        if repo_base is None and is_git_repo(repo_base):
             repo_base = get_git_root()
-
+        if not is_git_repo(repo_base):
+            raise ValueError("Not a GIT repository: %s" % repo_base)
         self.repo_base = repo_base
+
+        # Load configuration
         self._config = config.PackerConfig(self.repo_base)
+
+        # Base path of Packer
         self.base = os.path.join(self.repo_base, self._config.base_dir())
+        if not os.path.isdir(self.base):
+            raise IOError("Base Packer directory doesn't exist in %s" % self.base)
 
     def images(self):
         """

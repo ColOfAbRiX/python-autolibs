@@ -27,39 +27,57 @@ from __future__ import print_function
 
 import os
 import configparser
+from cfutils.gitutils import *
+
 
 class TerraformConfig:
     """
     Terraform Section Configuration
     """
     def __init__(self, repo_base):
+        if repo_base is None or not is_git_repo(repo_base):
+            raise ValueError("Not a GIT repository: %s" % repo_base)
         self._repo_base = repo_base
 
         self.config_file = os.path.join(self._repo_base, self.config_file())
+
+        # Configuration section
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
+        if "terraform" not in self.config.sections():
+            raise LookupError("Terraform configuration section doesn't exist in %s." % self.config_file)
 
-        self._terraform = {}
-        if "terraform" in self.config.sections():
-            self._terraform = self.config['terraform']
+        self._terraform = self.config['terraform']
 
     @staticmethod
     def config_file():
+        """
+        Name of the configuration file
+        """
         return ".repoconfig"
 
     def base_dir(self, full_path=False):
+        """
+        Base directory of Terraform
+        """
         base_dir = self._terraform.get("base_dir", "terraform")
         if full_path:
             base_dir = os.path.join(self._repo_base, base_dir)
         return base_dir
 
     def environments_dir(self, full_path=False):
+        """
+        Directory containing the environments
+        """
         environments_dir = self._terraform.get("environments_dir", "environments")
         if full_path:
             environments_dir = os.path.join(self._repo_base, environments_dir)
         return environments_dir
 
     def state_file(self):
+        """
+        Name of the Terraform state file
+        """
         return self._terraform.get("state_file", "terraform.tfstate")
 
 # vim: ft=python:ts=4:sw=4

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -125,17 +124,18 @@ from __future__ import print_function
 import glob
 import time
 import copy
-import StringIO
 import json
-
+import StringIO
 from repository import *
 from cfutils.execute import *
 from cfutils.formatting import *
 
+
 class YAMLInventory(object):
 
-    def __init__(self, yaml_file, override_yaml="", repo_info=AnsibleRepo()):
-        if repo_info.repo_base is None:
+    def __init__(self, yaml_file, override_yaml="", repo_info=None):
+        repo_info = AnsibleRepo() if repo_info is None else repo_info
+        if repo_info.base is None:
             print_c("ERROR: ", color="light_red", end='')
             print("The current directory is not a GIT repository.")
             sys.exit(1)
@@ -150,21 +150,18 @@ class YAMLInventory(object):
         self.inventory_base     = self.detect_inventory_base(yaml_file, repo_info)
         self.yaml_file          = yaml_file
         self.cache_file         = paths_full(local_tmp, 'inventory-cache.yml')
-        self.CACHE_EXPIRE       = 300
+        self.CACHE_EXPIRE       = 180
         self.override_yaml      = override_yaml
 
         # Load from cache only if the script has been called from the same process or
-        # the cache is older than 30 minutes (inventory changes are not frequent)
+        # the cache is older than X minutes (inventory changes are not frequent)
         load_cache = os.path.exists(self.cache_file) and \
                      (time.time() - os.path.getmtime(self.cache_file)) < self.CACHE_EXPIRE
-
-        # Cache is permanently disabled (not much benefits from it right now)
-        load_cache = False
 
         if load_cache:
             try:
                 # Loads the data from the cache file
-                load_cache = not self._load_cache()
+                load_cache = self._load_cache()
             except (ValueError, IOError):
                 # Cache is disabled if there are issues loading it
                 load_cache = False
@@ -173,7 +170,6 @@ class YAMLInventory(object):
 
         if not load_cache:
             """ Loading steps """
-
             # Load all the YAML files, starting with the main file
             self._load_yaml()
 
@@ -242,8 +238,8 @@ class YAMLInventory(object):
         search_in = [
             paths_full(os.path.dirname(main_yaml_file)),
             paths_full(os.path.dirname(sys.argv[0])),
-            paths_full(repo_info.repo_base, repo_info.inventory_base),
-            paths_full(repo_info.repo_base)
+            paths_full(repo_info.base, repo_info.inventory_base),
+            paths_full(repo_info.base)
         ] + opt_paths
 
         for where in search_in:
@@ -526,20 +522,28 @@ class YAMLInventory(object):
         with open(self.cache_file, 'r') as f:
             cache = json.load(f)
 
-        self.ansible_group_list = cache.get('group_list', {})
-        self.ansible_host_list  = cache.get('host_list', {})
+        self.ansible_group_list = cache.get('ansible_group_list', {})
+        self.ansible_host_list = cache.get('ansible_host_list', {})
+        self.group_list = cache.get('group_list', {})
+        self.host_list = cache.get('host_list', {})
         self.global_vars = cache.get('global_vars', {})
 
         # Returns true if all data has been loaded
-        return self.ansible_group_list and self.ansible_host_list and self.global_vars
+        return self.ansible_group_list and \
+            self.ansible_host_list and \
+            self.global_vars and \
+            self.group_list and \
+            self.host_list
 
     def _save_cache(self):
         """
         Saves the data in the cache
         """
         data = {
-            'group_list':  self.ansible_group_list,
-            'host_list':   self.ansible_host_list,
+            'ansible_group_list': self.ansible_group_list,
+            'ansible_host_list': self.ansible_host_list,
+            'group_list': self.group_list,
+            'host_list': self.host_list,
             'global_vars': self.global_vars
         }
 

@@ -30,7 +30,6 @@ from __future__ import print_function
 
 import sys
 import argparse
-
 from cfutils.formatting import *
 from autolibs.ansible.inventory import *
 from autolibs.ansible.repository import *
@@ -44,25 +43,39 @@ def inventory(args):
     # The user can add a high-priority YAML code that is imported last
     override = os.environ.get('INVENTORY_OVERRIDE', '')
 
-    # Get the appropriate information from the inventory
-    if args.list:
-        output = YAMLInventory(main_yaml, override_yaml=override).get_list()
-        p_json(output)
+    try:
+        # Get the appropriate information from the inventory
+        if args.list:
+            output = YAMLInventory(main_yaml, override_yaml=override).get_list()
+            p_json(output)
 
-    elif args.host:
-        output = YAMLInventory(main_yaml, override_yaml=override).get_host(args.host)
-        p_json(output)
+        elif args.host:
+            output = YAMLInventory(main_yaml, override_yaml=override).get_host(args.host)
+            p_json(output)
 
-    elif args.list_hosts != '' or args.list_groups != '':
-        inventory = YAMLInventory(main_yaml, override_yaml=override)
-        if args.list_hosts != '':
-            p_json(inventory.get_hosts(args.list_hosts))
-        if args.list_groups != '':
-            p_json(inventory.get_groups(args.list_groups))
+        elif args.list_hosts != '' or args.list_groups != '':
+            inventory = YAMLInventory(main_yaml, override_yaml=override)
 
-    else:
-        output = YAMLInventory.get_empty()
-        p_json(output)
+            # Display hosts
+            if args.list_hosts != '':
+                print(inventory.get_hosts(args.list_hosts))
+            elif args.list_hosts is None:
+                p_json(inventory.get_hosts(args.list_hosts))
+
+            # Display groups
+            if args.list_groups != '':
+                print(inventory.get_groups(args.list_groups))
+            elif args.list_groups is None:
+                p_json(inventory.get_groups(args.list_groups))
+
+        else:
+            output = YAMLInventory.get_empty()
+            p_json(output)
+
+    except (ValueError, IOError, LookupError) as e:
+        print_c("ERROR! ", color="light_red", file=sys.stderr)
+        print(e, file=sys.stderr)
+        sys.exit(1)
 
 
 def main():
