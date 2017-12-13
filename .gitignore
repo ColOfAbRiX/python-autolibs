@@ -1,0 +1,12 @@
+# IDE Specific
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+/.idea
+
+# Python and other junk files
+*.egg-info
+.*.swp
+*.pyc

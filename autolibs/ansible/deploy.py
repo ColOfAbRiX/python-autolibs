@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -103,7 +102,7 @@ class DeployConfig:
             os.path.join(target, repo_info.dynainv_file),
             repo_info.dynainv_path,
         ]
-        search_in = [paths_full(repo_info.repo_base, repo_info.inventory_base, x) for x in search_in]
+        search_in = [paths_full(repo_info.base, repo_info.inventory_base, x) for x in search_in]
 
         for where in search_in:
             if not os.path.isfile(where):
@@ -138,7 +137,7 @@ class DeployConfig:
             repo_info.inventory_base,
             "",
         ]
-        search_in = [paths_full(repo_info.repo_base, x, repo_info.vault_file) for x in search_in]
+        search_in = [paths_full(repo_info.base, x, repo_info.vault_file) for x in search_in]
 
         for where in search_in:
             if not os.path.isfile(where):
@@ -168,7 +167,7 @@ class DeployConfig:
             repo_info.inventory_base,
             "",
         ]
-        search_in = [paths_full(repo_info.repo_base, x, repo_info.ssh_key) for x in search_in]
+        search_in = [paths_full(repo_info.base, x, repo_info.ssh_key) for x in search_in]
 
         for where in search_in:
             if not os.path.isfile(where):
