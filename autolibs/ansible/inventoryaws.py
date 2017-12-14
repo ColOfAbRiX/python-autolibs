@@ -57,7 +57,6 @@ import os
 import boto3
 import argparse
 import configparser
-
 from stat import *
 from cfutils import *
 
@@ -99,10 +98,11 @@ def build_hosts(regions=[]):
             'ec2', region_name=r, aws_access_key_id=access_key, aws_secret_access_key=secret_key
         )
 
-        # Collect only instances with tag: Ansible=True
+        # Collect only running instances with tag: Ansible=True
         filters = [
             {'Name': 'tag-key', 'Values': ['Ansible']},
             {'Name': 'tag-value', 'Values': ['True']},
+            {'Name': 'instance-state-name', 'Values': ['running']},
         ]
 
         instances.extend(
