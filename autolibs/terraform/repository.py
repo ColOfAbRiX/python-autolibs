@@ -27,8 +27,8 @@ from __future__ import print_function
 
 import os
 import config
-
 from cfutils.gitutils import *
+
 
 class TerraformRepo:
     """

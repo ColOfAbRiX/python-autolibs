@@ -51,20 +51,20 @@ def pre_commit():
     # We make calls to sub-checks for each component so that there can be
     # specific checks for Ansible, Terraform and Packer
     try:
-        config = Config(RepoInfo().repo_base)
+        repository = RepoInfo()
 
         # Ansible GIT hook
-        if os.path.isdir(config.ansible.base_dir(full_path=True)):
+        if repository.ansible is not None:
             if not ansible.pre_commit():
                 sys.exit(1)
 
         # Packer GIT hook
-        if os.path.isdir(config.packer.base_dir(full_path=True)):
+        if repository.packer is not None:
             if not packer.pre_commit():
                 sys.exit(1)
 
         # Terraform GIT hook
-        if os.path.isdir(config.terraform.base_dir(full_path=True)):
+        if repository.terraform is not None:
             if not terraform.pre_commit():
                 sys.exit(1)
 
