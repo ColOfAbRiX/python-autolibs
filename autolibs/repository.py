@@ -31,7 +31,7 @@ import config
 import packer
 import ansible
 import terraform
-from cfutils.gitutils import get_git_root
+from cfutils.gitutils import *
 
 
 class RepoInfo:
@@ -50,19 +50,19 @@ class RepoInfo:
         # Ansible
         try:
             self.ansible = ansible.AnsibleRepo(self.repo_base)
-        except LookupError:
+        except (LookupError, IOError):
             self.ansible = None
 
         # Packer
         try:
             self.packer = packer.PackerRepo(self.repo_base)
-        except LookupError:
+        except (LookupError, IOError):
             self.packer = None
 
         # Terraform
         try:
             self.terraform = terraform.TerraformRepo(self.repo_base)
-        except LookupError:
+        except (LookupError, IOError):
             self.terraform = None
 
 # vim: ft=python:ts=4:sw=4
