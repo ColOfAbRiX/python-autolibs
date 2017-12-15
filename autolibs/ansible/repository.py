@@ -33,7 +33,6 @@ import sys
 import yaml
 import glob
 import config
-
 from cfutils.common import *
 from cfutils.execute import *
 from cfutils.gitutils import *
@@ -56,7 +55,7 @@ class AnsibleRepo:
         # Load configuration
         self._config = config.AnsibleConfig(self.repo_base)
 
-        # Base path of Packer
+        # Base path of Ansible
         self.base = os.path.join(self.repo_base, self._config.base_dir())
         if not os.path.isdir(self.base):
             raise IOError("Base Ansible directory doesn't exist in %s" % self.base)

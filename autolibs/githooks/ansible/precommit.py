@@ -47,7 +47,7 @@ def pre_commit():
     # Check YAML syntax (not Ansible validity, it will take too long)
     print_c("  Checking YAML syntax... ", end='')
     bad_yaml = []
-    for root, _, files in os.walk(repo.repo_base, topdown=False):
+    for root, _, files in os.walk(repo.base, topdown=False):
         if '.git' in root:
             continue
         for name in files:
@@ -65,7 +65,7 @@ def pre_commit():
             "Bad files:"
         )
         for f in bad_yaml:
-            print("  %s" % f[(len(repo.repo_base) + 1):])
+            print("  %s" % f[(len(repo.base) + 1):])
         print(
             "\nAborting the commit.\n"
         )
@@ -76,7 +76,7 @@ def pre_commit():
     # Check cleartext passwords
     print_c("  Checking cleartext secrets... ", end='')
     vaults = []
-    for root, _, files in os.walk(repo.repo_base, topdown=False):
+    for root, _, files in os.walk(repo.base, topdown=False):
         if '.git' in root:
             continue
         for name in files:
@@ -98,7 +98,7 @@ def pre_commit():
             "Sensitive files:"
         )
         for f in vaults:
-            print("  %s" % f[(len(repo.repo_base) + 1):])
+            print("  %s" % f[(len(repo.base) + 1):])
         print(
             "\nAborting the commit.\n"
         )
