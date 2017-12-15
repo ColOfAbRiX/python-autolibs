@@ -57,12 +57,15 @@ import os
 import boto3
 import argparse
 import configparser
-
 from stat import *
 from cfutils import *
 
 
 def load_credentials():
+    """
+    Load the credentials from specific file. We don't use the standard BOTO way
+    because we want to be able to manage the credentials differently
+    """
     config = configparser.ConfigParser()
 
     # Look for the file
@@ -99,10 +102,11 @@ def build_hosts(regions=[]):
             'ec2', region_name=r, aws_access_key_id=access_key, aws_secret_access_key=secret_key
         )
 
-        # Collect only instances with tag: Ansible=True
+        # Collect only running instances with tag: Ansible=True
         filters = [
             {'Name': 'tag-key', 'Values': ['Ansible']},
             {'Name': 'tag-value', 'Values': ['True']},
+            {'Name': 'instance-state-name', 'Values': ['running']},
         ]
 
         instances.extend(
@@ -137,6 +141,11 @@ def build_host_info(instance, region):
     # Environment
     if 'Environment' in tags and tags['Environment'] not in groups:
         groups.append(tags['Environment'])
+
+    # If the hostname is completely missing, use ID and the private IP address
+    if hostname is None:
+        hostname = instance.id
+        variables['ansible_host'] = instance.private_ip_address
 
     # Build and return
     return {
