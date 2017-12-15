@@ -62,6 +62,10 @@ from cfutils import *
 
 
 def load_credentials():
+    """
+    Load the credentials from specific file. We don't use the standard BOTO way
+    because we want to be able to manage the credentials differently
+    """
     config = configparser.ConfigParser()
 
     # Look for the file
@@ -137,6 +141,11 @@ def build_host_info(instance, region):
     # Environment
     if 'Environment' in tags and tags['Environment'] not in groups:
         groups.append(tags['Environment'])
+
+    # If the hostname is completely missing, use ID and the private IP address
+    if hostname is None:
+        hostname = instance.id
+        variables['ansible_host'] = instance.private_ip_address
 
     # Build and return
     return {
