@@ -43,6 +43,10 @@ class Config:
         self.config_file = os.path.join(self._repo_base, self.config_file())
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
+        if "packer" not in self.config.sections():
+            raise LookupError("Repository configuration section doesn't exist in %s." % self.config_file)
+        self._repository = self.config['repository']
+
 
         # Ansible
         try:
@@ -68,5 +72,12 @@ class Config:
         Name of the configuration file
         """
         return ".repoconfig"
+
+    def secret_files(self):
+        """
+        List of sensitive files
+        """
+        return self._repository.get("secret_files", "").split(',')
+
 
 # vim: ft=python:ts=4:sw=4

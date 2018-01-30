@@ -71,7 +71,7 @@ class AnsibleConfig:
         """
         roles_dir = self._ansible.get("roles_dir", "roles")
         if full_path:
-            roles_dir = os.path.join(self._repo_base, roles_dir)
+            roles_dir = os.path.join(self.base_dir(True), roles_dir)
         return roles_dir
 
     def playbooks_dir(self, full_path=False):
@@ -80,7 +80,7 @@ class AnsibleConfig:
         """
         playbooks_dir = self._ansible.get("playbooks_dir", "playbooks")
         if full_path:
-            playbooks_dir = os.path.join(self._repo_base, playbooks_dir)
+            playbooks_dir = os.path.join(self.base_dir(True), playbooks_dir)
         return playbooks_dir
 
     def inventories_dir(self, full_path=False):
@@ -89,7 +89,7 @@ class AnsibleConfig:
         """
         inventories_dir = self._ansible.get("inventories_dir", "inventories")
         if full_path:
-            inventories_dir = os.path.join(self._repo_base, inventories_dir)
+            inventories_dir = os.path.join(self.base_dir(True), inventories_dir)
         return inventories_dir
 
     def run_as(self):
