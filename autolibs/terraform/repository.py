@@ -27,20 +27,21 @@ from __future__ import print_function
 
 import os
 import config
-from cfutils.gitutils import *
+from cfutils import gitutils
 
 
 class TerraformRepo:
     """
     Information about the Terraform section of the Automation Repository
     """
-
     def __init__(self, repo_base=None):
         # Get repository base
-        if repo_base is None and is_git_repo(repo_base):
-            repo_base = get_git_root()
-        if not is_git_repo(repo_base):
+        if repo_base is None:
+            repo_base = gitutils.get_git_root()
+
+        if not gitutils.is_git_repo(repo_base):
             raise ValueError("Not a GIT repository: %s" % repo_base)
+
         self.repo_base = repo_base
 
         # Load configuration
@@ -67,6 +68,9 @@ class TerraformRepo:
         """
         Base path of an environment
         """
+        if environment is None or environment == "":
+            raise ValueError("Environment cannot be empty")
+
         environment = os.path.join(self.environments_base, environment)
 
         if not os.path.exists(environment):

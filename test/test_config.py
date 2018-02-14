@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -22,49 +21,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
 
 from __future__ import print_function
 
-import os
-import git
-import config
-import packer
-import ansible
-import terraform
-from cfutils import gitutils
-from git.exc import NoSuchPathError
+import unittest
+from mock import patch
+
+from autolibs.config import Config
 
 
-class RepoInfo:
-    """
-    Information about an Automation Repository
-    """
-    def __init__(self, repo_base=None):
-        # Get repository base
-        if repo_base is None:
-            repo_base = gitutils.get_git_root()
-
-        if not gitutils.is_git_repo(repo_base):
-            raise ValueError("Not a GIT repository: %s" % repo_base)
-
-        self.repo_base = repo_base
-
-        # Ansible
-        try:
-            self.ansible = ansible.AnsibleRepo(self.repo_base)
-        except (LookupError, IOError, NoSuchPathError):
-            self.ansible = None
-
-        # Packer
-        try:
-            self.packer = packer.PackerRepo(self.repo_base)
-        except (LookupError, IOError, NoSuchPathError):
-            self.packer = None
-
-        # Terraform
-        try:
-            self.terraform = terraform.TerraformRepo(self.repo_base)
-        except (LookupError, IOError, NoSuchPathError):
-            self.terraform = None
+class ConfigTest(unittest.TestCase):
+    pass
 
 # vim: ft=python:ts=4:sw=4
