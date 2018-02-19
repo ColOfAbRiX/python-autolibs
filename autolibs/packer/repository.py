@@ -27,20 +27,21 @@ from __future__ import print_function
 
 import os
 import config
-from cfutils.gitutils import *
+from cfutils import gitutils
 
 
 class PackerRepo:
     """
     Information about the Packer section of the Automation Repository
     """
-
     def __init__(self, repo_base=None):
         # Get repository base
-        if repo_base is None and is_git_repo(repo_base):
-            repo_base = get_git_root()
-        if not is_git_repo(repo_base):
+        if repo_base is None and gitutils.is_git_repo(repo_base):
+            repo_base = gitutils.get_git_root()
+
+        if not gitutils.is_git_repo(repo_base):
             raise ValueError("Not a GIT repository: %s" % repo_base)
+
         self.repo_base = repo_base
 
         # Load configuration
@@ -62,6 +63,9 @@ class PackerRepo:
         """
         Base path of a VM image
         """
+        if image is None or image == "":
+            raise ValueError("Image cannot be empty")
+
         image = os.path.join(self.base, image)
 
         if not os.path.exists(image):

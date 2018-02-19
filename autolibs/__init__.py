@@ -24,11 +24,4 @@
 # SOFTWARE.
 #
 
-#from .repository import *
-#from .terraform import *
-#from .githooks import *
-#from .ansible import *
-#from .packer import *
-from .bin import *
-
 # vim: ft=python:ts=4:sw=4

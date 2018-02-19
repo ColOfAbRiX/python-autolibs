@@ -24,7 +24,7 @@
 # SOFTWARE.
 #
 
-from .packer import *
-from .ansible import *
+#from .packer import *
+#from .ansible import *
 
 # vim: ft=python:ts=4:sw=4

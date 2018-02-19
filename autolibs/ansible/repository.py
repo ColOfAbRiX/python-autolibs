@@ -33,9 +33,9 @@ import sys
 import yaml
 import glob
 import config
+from cfutils import gitutils
 from cfutils.common import *
 from cfutils.execute import *
-from cfutils.gitutils import *
 from ansible import constants as C
 
 
@@ -46,10 +46,12 @@ class AnsibleRepo:
 
     def __init__(self, repo_base=None):
         # Get repository base
-        if repo_base is None and is_git_repo(repo_base):
-            repo_base = get_git_root()
-        if not is_git_repo(repo_base):
+        if repo_base is None and gitutils.is_git_repo(repo_base):
+            repo_base = gitutils.get_git_root()
+
+        if not gitutils.is_git_repo(repo_base):
             raise ValueError("Not a GIT repository: %s" % repo_base)
+
         self.repo_base = repo_base
 
         # Load configuration
@@ -60,12 +62,7 @@ class AnsibleRepo:
         if not os.path.isdir(self.base):
             raise IOError("Base Ansible directory doesn't exist in %s" % self.base)
 
-        # Change the working directory to the root of the repository
-        old_cwd = os.getcwd()
-        os.chdir(self.base)
-        self._p, _ = C.load_config_file()
-        os.chdir(old_cwd)
-
+        self._load_ansible_config()
         self._set_executables()
 
         # Buffers
@@ -74,9 +71,11 @@ class AnsibleRepo:
         self._vaults    = None
 
         # Base paths
-        self.roles_base     = paths_full(self.base, "roles")
+        self.roles_base     = paths_full(self.base, self._config.roles_dir())
         self.playbooks_base = paths_full(self.base, self._config.playbooks_dir())
-        self.inventory_base = self.ans_config('defaults', 'inventory', '/etc/ansible/hosts')
+        self.inventory_base = paths_full(self.base,
+            self.ans_config('defaults', 'inventory', '/etc/ansible/hosts')
+        )
 
         # Others
         self.run_as         = self._config.run_as()
@@ -84,6 +83,33 @@ class AnsibleRepo:
         self.ssh_key        = self._config.ssh_key_file()
         self.dynainv_file   = self._config.dynamic_inventory_file()
         self.dynainv_path   = paths_full('scripts/ansible', self.dynainv_file)
+
+    def _load_ansible_config(self):
+        """
+        Loads a reference to the Ansible configuration file
+        """
+        old_cwd = os.getcwd()
+        os.chdir(self.base)
+        self._p, _ = C.load_config_file()
+        os.chdir(old_cwd)
+
+    def _set_executables(self):
+        """
+        Sets the ansible executables configuration
+        """
+        opt_dirs = ["/usr/local/bin", "/usr/bin", "/usr/local/sbin", "/usr/sbin:/bin"]
+        self.ansible = get_bin_path(
+            os.environ.get('ANSIBLE', self._config.exec_ansible()),
+            opt_dirs=opt_dirs
+        )
+        self.ansible_playbook = get_bin_path(
+            os.environ.get('ANSIBLE_PLAYBOOK', self._config.exec_ansible_playbook()),
+            opt_dirs=opt_dirs
+        )
+        self.ansible_vault = get_bin_path(
+            os.environ.get('ANSIBLE_VAULT', self._config.exec_ansible_vault()),
+            opt_dirs=opt_dirs
+        )
 
     def ans_config(self, section, name, default):
         """
@@ -166,23 +192,5 @@ class AnsibleRepo:
 
         self._tags = sorted(list(set(self._tags)))
         return self._tags
-
-    def _set_executables(self):
-        """
-        Sets the ansible executables configuration
-        """
-        opt_dirs = ["/usr/local/bin", "/usr/bin", "/usr/local/sbin", "/usr/sbin:/bin"]
-        self.ansible = get_bin_path(
-            os.environ.get('ANSIBLE', self._config.exec_ansible()),
-            opt_dirs=opt_dirs
-        )
-        self.ansible_playbook = get_bin_path(
-            os.environ.get('ANSIBLE_PLAYBOOK', self._config.exec_ansible_playbook()),
-            opt_dirs=opt_dirs
-        )
-        self.ansible_vault = get_bin_path(
-            os.environ.get('ANSIBLE_VAULT', self._config.exec_ansible_vault()),
-            opt_dirs=opt_dirs
-        )
 
 # vim: ft=python:ts=4:sw=4

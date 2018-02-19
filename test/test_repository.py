@@ -73,35 +73,38 @@ class RepoInfoTest(unittest.TestCase):
 
     """ Members """
 
-    @patch.object(autolibs.AnsibleRepo, '__init__', return_value=None)
+    @patch.object(autolibs.ansible.AnsibleRepo, '__init__', return_value=None)
     def test_ansible_present(self, ansible_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_with_ansible")
         self.assertIsNotNone(result.ansible)
 
-    def test_ansible_absent(self):
+    @patch.object(autolibs.ansible.AnsibleRepo, '__init__', side_effect=IOError())
+    def test_ansible_present(self, ansible_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_without_ansible")
         self.assertIsNone(result.ansible)
 
-    @patch.object(autolibs.TerraformRepo, '__init__', return_value=None)
+    @patch.object(autolibs.terraform.TerraformRepo, '__init__', return_value=None)
     def test_terraform_present(self, terraform_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_with_terraform")
         self.assertIsNotNone(result.terraform)
 
-    def test_terraform_absent(self):
+    @patch.object(autolibs.terraform.TerraformRepo, '__init__', side_effect=IOError())
+    def test_terraform_absent(self, terraform_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_without_terraform")
         self.assertIsNone(result.terraform)
 
-    @patch.object(autolibs.PackerRepo, '__init__', return_value=None)
+    @patch.object(autolibs.packer.PackerRepo, '__init__', return_value=None)
     def test_packer_present(self, packer_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_with_packer")
         self.assertIsNotNone(result.packer)
 
-    def test_packer_absent(self):
+    @patch.object(autolibs.packer.PackerRepo, '__init__', side_effect=IOError())
+    def test_packer_absent(self, packer_mock):
         self.is_git_repo.return_value = True
         result = RepoInfo(repo_base="/path_without_packer")
         self.assertIsNone(result.packer)
