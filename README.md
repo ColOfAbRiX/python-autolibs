@@ -2,7 +2,7 @@
 
 ## Python Automation Library
 
-Utilities for a structure automation project including tools to work with Ansible, Terraform and Packer.
+Utilities and wrappers for Ansible, Terraform and Packer
 
 ### Scripts
 
@@ -12,7 +12,7 @@ The package installs the following binaries:
  - **vault**: wrapper to run ansible-vault.
  - **inventory**: custom dynamic inventory script to use YAML.
  - **inventory-aws**: custom inventory script to fetch information from AWS.
- - **packit**: utility script to provide Packer with build information
+ - **packit**: utility script to provide Packer with build information (work in progress)
 
 ### Autocompletion
 
@@ -29,11 +29,21 @@ The package installs system wide GIT hooks to perform checks on the repository.
 
 The package requires the following additional python packages:
 
-- **cfutils**
+- **cfutils** (see )
 - **configparser2**
 - **ansible** from version 2.0.0 up to version 2.3.x
 
-To work properly, the autocompletion scripts need to be loaded at session startup, usually adding:
+## Installation
+
+Install using PIP:
+
+```
+sudo pip install https://github.com/ColOfAbRiX/python-autolibs/archive/master.zip
+```
+
+### Autocompletion
+
+The autocompletion scripts need to be loaded at session startup, usually adding:
 
 ```BASH
 #!/bin/bash
@@ -43,6 +53,10 @@ source "$(which support-vault)"
 
 to the `~/.bashrc` file in the home directory or to a `.sh` file inside `/etc/profile.d` for a system wide configuration.
 
-## Credits
+## License
 
-Fabrizio Colonna <colofabrix@tin.it>
+MIT
+
+## Author Information
+
+[Fabrizio Colonna](mailto:colofabrix@tin.it)

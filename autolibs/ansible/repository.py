@@ -82,7 +82,12 @@ class AnsibleRepo:
         self.vault_file     = self._config.vault_file()
         self.ssh_key        = self._config.ssh_key_file()
         self.dynainv_file   = self._config.dynamic_inventory_file()
-        self.dynainv_path   = paths_full('scripts/ansible', self.dynainv_file)
+        # Default path where to search for the dynamic inventory
+        self.dynainv_path   = paths_full(
+            self.base,
+            "scripts",
+            self.dynainv_file
+        )
 
     def _load_ansible_config(self):
         """
@@ -176,11 +181,11 @@ class AnsibleRepo:
 
         for task_file in glob.glob(paths_full(self.roles_base, "*/tasks/*.yml")):
             try:
-                f = open(task_file, "r")
-                doc = yaml.load(f, Loader=yaml.CLoader)
-                if doc is None:
-                    continue
-                f.close()
+                with open(task_file, "r") as f:
+                    doc = yaml.load(f, Loader=yaml.CLoader)
+                    # Check it's proper Ansible-YAML
+                    if not isinstance(doc, (list, )):
+                        continue
             except (OSError, IOError, yaml.YAMLError):
                 continue
 

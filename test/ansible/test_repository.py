@@ -26,7 +26,7 @@
 from __future__ import print_function
 
 import unittest
-from mock import patch
+from mock import patch, mock_open
 
 import os
 from autolibs.ansible import AnsibleRepo
@@ -88,6 +88,10 @@ class AnsibleConfigMock:
 
     def exec_ansible_vault(self):
         return self.exec_ansible_vault_cfg
+
+
+def get_bin_path_mock(arg, opt_dirs=[]):
+    return os.path.join("/usr/bin", arg)
 
 
 class AnsibleRepoTest(unittest.TestCase):
@@ -237,6 +241,7 @@ class AnsibleRepoTest(unittest.TestCase):
             )
         ).vault_file
         self.assertEquals(result, "test_vault_file")
+        self.assertTrue(result.find('/') == -1)
 
     """ ssh_key """
 
@@ -247,6 +252,7 @@ class AnsibleRepoTest(unittest.TestCase):
             )
         ).ssh_key
         self.assertEquals(result, "test_ssh_key")
+        self.assertTrue(result.find('/') == -1)
 
     """ dynainv_file """
 
@@ -257,21 +263,327 @@ class AnsibleRepoTest(unittest.TestCase):
             )
         ).dynainv_file
         self.assertEquals(result, "test_dynainv_file")
+        self.assertTrue(result.find('/') == -1)
 
     """ dynainv_path """
 
+    def test_dynainv_path(self):
+        result = self.buildAnsibleRepo(
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base",
+                dynainv_path_cfg="test_dynainv_path"
+            )
+        ).dynainv_path
+        self.assertEquals(result, "/repo_path/ansible_base/scripts/inventory")
+        self.assertTrue(os.path.isabs(result))
+
     """ ansible """
+
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_from_config(self, *args):
+        result = self.buildAnsibleRepo(
+            mck_ans_config=AnsibleConfigMock(
+                exec_ansible_cfg="ansible_cmd"
+            )
+        ).ansible
+        self.assertEquals(result, "/usr/bin/ansible_cmd")
+
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_from_env(self, *args):
+        os.environ['ANSIBLE'] = "ansible_cmd"
+        result = self.buildAnsibleRepo().ansible
+        self.assertEquals(result, "/usr/bin/ansible_cmd")
 
     """ ansible_playbook """
 
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_playbook_from_config(self, *args):
+        result = self.buildAnsibleRepo(
+            mck_ans_config=AnsibleConfigMock(
+                exec_ansible_playbook_cfg="ansible_playbook_cmd"
+            )
+        ).ansible_playbook
+        self.assertEquals(result, "/usr/bin/ansible_playbook_cmd")
+
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_playbook_from_env(self, *args):
+        os.environ['ANSIBLE_PLAYBOOK'] = "ansible_playbook_cmd"
+        result = self.buildAnsibleRepo().ansible_playbook
+        self.assertEquals(result, "/usr/bin/ansible_playbook_cmd")
+
     """ ansible_vault """
+
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_vault_from_config(self, *args):
+        result = self.buildAnsibleRepo(
+            mck_ans_config=AnsibleConfigMock(
+                exec_ansible_vault_cfg="ansible_vault_cmd"
+            )
+        ).ansible_vault
+        self.assertEquals(result, "/usr/bin/ansible_vault_cmd")
+
+    @patch('autolibs.ansible.repository.get_bin_path', side_effect=get_bin_path_mock)
+    def test_ansible_vault_from_env(self, *args):
+        os.environ['ANSIBLE_VAULT'] = "ansible_vault_cmd"
+        result = self.buildAnsibleRepo().ansible_vault
+        self.assertEquals(result, "/usr/bin/ansible_vault_cmd")
 
     """ ans_config(self, section, name, default) """
 
+    @patch('autolibs.ansible.repository.C.get_config')
+    def test_get_config_value(self, mock):
+        mock.side_effect = AnsibleConstsMock(
+            values={'defaults': {'test_key': 'test_value'}}
+        ).get_config
+        result = self.buildAnsibleRepo().ans_config(
+            'defaults', 'test_key', 'default_value'
+        )
+        self.assertEquals(result, "test_value")
+
+    @patch('autolibs.ansible.repository.C.get_config')
+    def test_get_config_default(self, mock):
+        mock.side_effect = AnsibleConstsMock(
+            values={'defaults': {'test_key': 'test_value'}}
+        ).get_config
+        result = self.buildAnsibleRepo().ans_config(
+            'defaults', 'missing_test_key', 'default_value'
+        )
+        self.assertEquals(result, "default_value")
+
     """ playbooks(self) """
+
+    @patch('os.walk')
+    def test_playbooks_empty_dir(self, mock):
+        mock.return_value = []
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base",
+                playbooks_dir_cfg="test_playbooks"
+            )
+        ).playbooks()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    def test_playbooks_skip_git(self, mock):
+        mock.return_value = [
+            ('/repo_path/ansible_base/test_playbooks/.git', [], ['playbook_1.yml', 'playbook_2.yml', 'playbook_3.yml'])
+        ]
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base",
+                playbooks_dir_cfg="test_playbooks"
+            )
+        ).playbooks()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    def test_playbooks_plain(self, mock):
+        mock.return_value = [
+            ('/repo_path/ansible_base/test_playbooks/', [], ['playbook_1.yml', 'playbook_2.yml', 'playbook_3.yml'])
+        ]
+        expected = [
+            '/repo_path/ansible_base/test_playbooks/playbook_1.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_2.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_3.yml'
+        ]
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base",
+                playbooks_dir_cfg="test_playbooks"
+            )
+        ).playbooks()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    def test_playbooks_subdirs(self, mock):
+        mock.return_value = [
+            ('/repo_path/ansible_base/test_playbooks/subdir_1', [], ['playbook_1.yml', 'playbook_2.yml', 'playbook_3.yml']),
+            ('/repo_path/ansible_base/test_playbooks/subdir_2', [], ['playbook_1.yml', 'playbook_2.yml']),
+            ('/repo_path/ansible_base/test_playbooks/', ['subdir_1', 'subdir_2'], ['playbook_1.yml', 'playbook_2.yml', 'playbook_3.yml', 'playbook_4.yml'])
+        ]
+        expected = [
+            '/repo_path/ansible_base/test_playbooks/subdir_1/playbook_1.yml',
+            '/repo_path/ansible_base/test_playbooks/subdir_1/playbook_2.yml',
+            '/repo_path/ansible_base/test_playbooks/subdir_1/playbook_3.yml',
+            '/repo_path/ansible_base/test_playbooks/subdir_2/playbook_1.yml',
+            '/repo_path/ansible_base/test_playbooks/subdir_2/playbook_2.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_1.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_2.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_3.yml',
+            '/repo_path/ansible_base/test_playbooks/playbook_4.yml'
+        ]
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base",
+                playbooks_dir_cfg="test_playbooks"
+            )
+        ).playbooks()
+        self.assertListEqual(result, expected)
 
     """ vaulted(self) """
 
+    @patch('os.walk')
+    def test_vaulted_empty_dir(self, mock):
+        mock.return_value = []
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).vaulted()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    @patch('__builtin__.open')
+    def test_vaulted_no_vaults(self, mock_open, mock_walk):
+        mock_open.return_value = string_io('Content 1', 'Content 21\nContent 22', 'Content 3')
+        mock_walk.return_value = [
+            ('/repo_path/ansible_base', [], ['file_1.yml', 'file_2.yml', 'file_3.yml'])
+        ]
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).vaulted()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    @patch('__builtin__.open')
+    def test_vaulted_cannot_open(self, mock_open, mock_walk):
+        mock_walk.return_value = []
+        mock_open.side_effect = IOError()
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).vaulted()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    def test_vaulted_skip_git(self, mock):
+        mock.return_value = [
+            ('/repo_path/ansible_base/.git', [], ['file_1.yml', 'file_2.yml', 'file_3.yml'])
+        ]
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).vaulted()
+        self.assertListEqual(result, expected)
+
+    @patch('os.walk')
+    @patch('__builtin__.open')
+    def test_vaulted_vaulted(self, mock_open, mock_walk):
+        mock_open.return_value = string_io('$ANSIBLE_VAULT;1.1;AES256', 'Content 2', '$ANSIBLE_VAULT;1.1;AES256')
+        mock_walk.return_value = [
+            ('/repo_path/ansible_base', [], ['file_1.yml', 'file_2.yml', 'file_3.yml'])
+        ]
+        expected = [
+            '/repo_path/ansible_base/file_1.yml',
+            '/repo_path/ansible_base/file_3.yml'
+        ]
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).vaulted()
+        self.assertListEqual(result, expected)
+
     """ tags(self) """
+
+    @patch('glob.glob')
+    def test_tags_empty_dir(self, mock_glob):
+        mock_glob.return_value = []
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).tags()
+        self.assertListEqual(result, expected)
+
+    @patch('glob.glob')
+    @patch('__builtin__.open')
+    def test_tags_cannot_open(self, mock_open, mock_glob):
+        mock_glob.return_value = []
+        mock_open.side_effect = IOError()
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).tags()
+        self.assertListEqual(result, expected)
+
+    @patch('glob.glob')
+    @patch('__builtin__.open')
+    def test_tags_badyaml_content(self, mock_open, mock_glob):
+        mock_open.return_value = string_io('not_a_yaml_content')
+        mock_glob.return_value = ['file_1.yml']
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).tags()
+        self.assertListEqual(result, expected)
+
+    @patch('glob.glob')
+    @patch('__builtin__.open')
+    def test_tags_notags(self, mock_open, mock_glob):
+        mock_open.return_value = string_io('- {name: missing tags}')
+        mock_glob.return_value = ['file_1.yml']
+        expected = []
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).tags()
+        self.assertListEqual(result, expected)
+
+    @patch('glob.glob')
+    @patch('__builtin__.open')
+    def test_tags_tags(self, mock_open, mock_glob):
+        mock_open.return_value = string_io(
+            '[{tags: [tag_1, tag_2]}, {name: no tags here}, {tags: tags_3}]'
+        )
+        mock_glob.return_value = ['file_1.yml']
+        expected = ['tag_1', 'tag_2', 'tags_3']
+        result = self.buildAnsibleRepo(
+            repo_root="/repo_path",
+            mck_ans_config=AnsibleConfigMock(
+                ansible_dir="ansible_base"
+            )
+        ).tags()
+        self.assertListEqual(result, expected)
+
+
+def string_io(*texts):
+    """
+    Using a StringIO so I can mock open. Found this trick here:
+    https://stackoverflow.com/questions/12028637/pythons-stringio-doesnt-do-well-with-with-statements
+    """
+    from StringIO import StringIO
+    StringIO.__exit__ = lambda *args: args[0]
+    StringIO.__enter__ = lambda *args: args[0]
+    return StringIO(unicode('\n'.join(texts), 'utf-8'))
 
 # vim: ft=python:ts=4:sw=4
