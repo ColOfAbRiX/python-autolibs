@@ -1,0 +1,73 @@
+# config file for the automation repository
+# ==============================================
+
+[repository]
+# Settings for the repository configuration
+
+# Comma-separated list of file that are considered sensitive, like password
+# file or private access keys
+#secret_files = vault.txt,access_key.pem,aws_credentials,secrets.tfvars
+
+
+[ansible]
+# Configuration for the Ansible section
+
+# Directory, under the repository root, where Ansible is located
+#base_dir = ansible
+
+# Ansible roles directory
+#roles_dir = roles
+
+# Root directory containing the playbooks.
+#playbooks_dir = playbooks
+
+# Ansible inventories directories
+#inventories_dir = inventories
+
+# Run Ansible as this specific user
+#run_as = ansible
+
+# Name of the dynamic inventory script. The deployment wrapper will look in
+# various positions inside the repository looking for this script
+#dynamic_inventory_file = inventory
+
+# Name of the file that contains the vault password. The file doesn't need to be
+# present, but if it is then this will be its name.
+#vault_file = vault.txt
+
+# Name of the file, inside the inventory, containing the SSH key
+#ssh_key_file = access_key.pem
+
+# ansible executable
+#exec_ansible = ansible
+
+# ansible-playbook executable
+#exec_ansible_playbook = ansible-playbook
+
+# ansible-vault executable
+#exec_ansible_vault = ansible-vault
+
+
+[packer]
+# Configuration for the Packer section
+
+# Directory, under the repository root, where Packer is located
+#base_dir = packer
+
+# This is the file that packer will use as its input
+#packer_file = packer.json
+
+
+[terraform]
+# Configuration for the Terraform section
+
+# Directory, under the repository root, where Packer is located
+#base_dir = terraform
+
+# Name of the directory containing the environments
+#environments_dir = environments
+
+# Name of the Terraform state file
+#state_file = terraform.tfstate
+
+# vim: ft=dosini:ts=4:sw=4

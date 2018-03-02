@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -77,7 +76,6 @@ class Config:
         """
         List of sensitive files
         """
-        return self._repository.get("secret_files", "").split(',')
-
+        return self._repository.get("secret_files", "vault.txt,access_key.pem,aws_credentials,secrets.tfvars").split(',')
 
 # vim: ft=python:ts=4:sw=4

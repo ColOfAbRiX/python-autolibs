@@ -28,10 +28,57 @@ from __future__ import print_function
 import unittest
 from mock import patch
 
+import autolibs
 from autolibs.config import Config
 
 
 class ConfigTest(unittest.TestCase):
-    pass
+
+    def setUp(self):
+        self.get_git_root_patch = patch('cfutils.gitutils.get_git_root')
+        self.get_git_root = self.get_git_root_patch.start()
+
+        self.is_git_repo_patch = patch('cfutils.gitutils.is_git_repo')
+        self.is_git_repo = self.is_git_repo_patch.start()
+
+    def tearDown(self):
+        self.is_git_repo_patch.stop()
+        self.get_git_root_patch.stop()
+
+    """ Creation """
+
+    def test_reponotgiven_on_goodrepo(self):
+        self.get_git_root.return_value = "/good_repo-path"
+        self.is_git_repo.return_value = True
+        result = RepoInfo()
+        self.assertIsNotNone(result)
+        self.assertEquals(result.repo_base, "/good_repo-path")
+
+    def test_reponotgiven_on_badrepo(self):
+        self.get_git_root.return_value = "/bad-path"
+        self.is_git_repo.return_value = False
+        with self.assertRaises(ValueError):
+            result = RepoInfo()
+
+    def test_goodrepo_given(self):
+        self.is_git_repo.return_value = True
+        result = RepoInfo(repo_base="/good_repo-path")
+        self.assertIsNotNone(result)
+        self.assertEquals(result.repo_base, "/good_repo-path")
+
+    def test_badrepo_given(self):
+        self.is_git_repo.return_value = False
+        with self.assertRaises(ValueError):
+            result = RepoInfo(repo_base="/bad-path")
+
+    """ config_file """
+
+    """ config """
+
+    """ ansible """
+
+    """ packer """
+
+    """ secret_files() """
 
 # vim: ft=python:ts=4:sw=4
