@@ -32,53 +32,145 @@ import autolibs
 from autolibs.config import Config
 
 
+class ConfigParserMock:
+
+    def __init__(self, sections=[], content={}):
+        self.sects = sections
+        self.content = content
+
+    def sections(self):
+        return self.sects
+
+    def read(self, filename):
+        pass
+
+    def __getitem__(self, key):
+        if key not in self.content.keys():
+            raise KeyError
+        return self.content[key]
+
+
 class ConfigTest(unittest.TestCase):
 
     def setUp(self):
-        self.get_git_root_patch = patch('cfutils.gitutils.get_git_root')
-        self.get_git_root = self.get_git_root_patch.start()
+        self.ansible_patch = patch('autolibs.ansible.AnsibleConfig', autospec=True, return_value=None)
+        self.ansible = self.ansible_patch.start()
 
-        self.is_git_repo_patch = patch('cfutils.gitutils.is_git_repo')
-        self.is_git_repo = self.is_git_repo_patch.start()
+        self.terraform_patch = patch('autolibs.terraform.TerraformConfig', autospec=True, return_value=None)
+        self.terraform = self.terraform_patch.start()
+
+        self.packer_patch = patch('autolibs.packer.PackerConfig', autospec=True, return_value=None)
+        self.packer = self.packer_patch.start()
+
+        self.config_parser_patch = patch('configparser.ConfigParser', autospec=True)
+        self.config_parser = self.config_parser_patch.start()
 
     def tearDown(self):
-        self.is_git_repo_patch.stop()
-        self.get_git_root_patch.stop()
+        self.ansible_patch.stop()
+        self.terraform_patch.stop()
+        self.packer_patch.stop()
+        self.config_parser_patch.stop()
 
     """ Creation """
 
-    def test_reponotgiven_on_goodrepo(self):
-        self.get_git_root.return_value = "/good_repo-path"
-        self.is_git_repo.return_value = True
-        result = RepoInfo()
-        self.assertIsNotNone(result)
-        self.assertEquals(result.repo_base, "/good_repo-path")
-
-    def test_reponotgiven_on_badrepo(self):
-        self.get_git_root.return_value = "/bad-path"
-        self.is_git_repo.return_value = False
+    def test_missing_repo_root(self):
         with self.assertRaises(ValueError):
-            result = RepoInfo()
-
-    def test_goodrepo_given(self):
-        self.is_git_repo.return_value = True
-        result = RepoInfo(repo_base="/good_repo-path")
-        self.assertIsNotNone(result)
-        self.assertEquals(result.repo_base, "/good_repo-path")
-
-    def test_badrepo_given(self):
-        self.is_git_repo.return_value = False
-        with self.assertRaises(ValueError):
-            result = RepoInfo(repo_base="/bad-path")
+            result = Config("bad_path")
 
     """ config_file """
 
+    def test_config_file(self):
+        result = Config("/").config_file
+        self.assertEquals(result, "/.repoconfig")
+
     """ config """
+
+    def test_missing_file(self):
+        result = Config("/").config
+        self.assertIsNone(result)
+
+    def test_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = Config("/").config
+        self.assertIsNone(result)
+
+    def test_config(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['repository'],
+            content={'repository': {}}
+        )
+        result = Config("/").config
+        self.assertIsNotNone(result)
 
     """ ansible """
 
+    def test_ansible_notpresent(self):
+        self.ansible.side_effect = LookupError()
+        result = Config(repo_base="/").ansible
+        self.assertIsNone(result)
+
+    def test_ansible_present(self):
+        self.ansible.return_value = "DummyValue"
+        result = Config(repo_base="/").ansible
+        self.assertIsNotNone(result)
+
+    """ terraform """
+
+    def test_terraform_notpresent(self):
+        self.terraform.side_effect = LookupError()
+        result = Config(repo_base="/").terraform
+        self.assertIsNone(result)
+
+    def test_terraform_present(self):
+        self.terraform.return_value = "DummyValue"
+        result = Config(repo_base="/").terraform
+        self.assertIsNotNone(result)
+
     """ packer """
 
+    def test_packer_notpresent(self):
+        self.packer.side_effect = LookupError()
+        result = Config(repo_base="/").packer
+        self.assertIsNone(result)
+
+    def test_packer_present(self):
+        self.packer.return_value = "DummyValue"
+        result = Config(repo_base="/").packer
+        self.assertIsNotNone(result)
+
     """ secret_files() """
+
+    def test_secret_files_default_on_missing_file(self):
+        result = Config("/").secret_files()
+        self.assertTrue(len(result) > 0)
+
+    def test_secret_files_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = Config("/").secret_files()
+        self.assertTrue(len(result) > 0)
+
+    def test_secret_files_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['repository'],
+            content={'repository': {}}
+        )
+        result = Config("/").secret_files()
+        self.assertTrue(len(result) > 0)
+
+    def test_secret_files_empty_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['repository'],
+            content={'repository': {'secret_files': ''}}
+        )
+        result = Config("/").secret_files()
+        self.assertListEqual(result, [])
+
+    def test_secret_files_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['repository'],
+            content={'repository': {'secret_files': 'test_secret_1,test_secret_2'}}
+        )
+        result = Config("/").secret_files()
+        self.assertListEqual(result, ['test_secret_1', 'test_secret_2'])
 
 # vim: ft=python:ts=4:sw=4

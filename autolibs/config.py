@@ -37,15 +37,17 @@ class Config:
     """
 
     def __init__(self, repo_base):
+        if not os.path.isdir(repo_base):
+            raise ValueError("Not a valid path: %s" % repo_base)
         self._repo_base = repo_base
 
         self.config_file = os.path.join(self._repo_base, self.config_file())
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
-        if "packer" not in self.config.sections():
-            raise LookupError("Repository configuration section doesn't exist in %s." % self.config_file)
-        self._repository = self.config['repository']
-
+        if "repository" not in self.config.sections():
+            self.config = None
+        else:
+            self._repository = self.config['repository']
 
         # Ansible
         try:
@@ -76,6 +78,11 @@ class Config:
         """
         List of sensitive files
         """
-        return self._repository.get("secret_files", "vault.txt,access_key.pem,aws_credentials,secrets.tfvars").split(',')
+        result = "vault.txt,access_key.pem,aws_credentials,secrets.tfvars"
+
+        if self.config is not None:
+            result = self._repository.get("secret_files", result)
+
+        return filter(None, result.split(','))
 
 # vim: ft=python:ts=4:sw=4
