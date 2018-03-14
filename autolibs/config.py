@@ -46,6 +46,7 @@ class Config:
         self.config.read(self.config_file)
         if "repository" not in self.config.sections():
             self.config = None
+            self._repository = None
         else:
             self._repository = self.config['repository']
 
@@ -80,7 +81,7 @@ class Config:
         """
         result = "vault.txt,access_key.pem,aws_credentials,secrets.tfvars"
 
-        if self.config is not None:
+        if self._repository is not None:
             result = self._repository.get("secret_files", result)
 
         return filter(None, result.split(','))
