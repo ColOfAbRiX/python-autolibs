@@ -62,8 +62,9 @@ class PackerConfig:
 
         if self._packer is not None:
             result = self._packer.get("base_dir", result)
-            if full_path:
-                result = os.path.join(self._repo_base, result)
+
+        if full_path:
+            result = os.path.join(self._repo_base, result)
 
         return result
 

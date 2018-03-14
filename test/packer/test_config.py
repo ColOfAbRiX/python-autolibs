@@ -28,6 +28,7 @@ from __future__ import print_function
 import unittest
 from mock import patch
 
+import os
 import autolibs
 from autolibs.packer.config import PackerConfig
 
@@ -43,11 +44,6 @@ class ConfigParserMock:
 
     def read(self, filename):
         pass
-
-    # def get(self, key, default=None):
-    #     if key not in self.content.keys():
-    #         raise default
-    #     return self.content[key]
 
     def __getitem__(self, key):
         if key not in self.content.keys():
@@ -122,6 +118,11 @@ class ConfigTest(unittest.TestCase):
         result = PackerConfig("/").base_dir()
         self.assertEquals(result, 'test_dir')
 
+    def test_base_dir_value_abspath(self):
+        self.config_parser.return_value = ConfigParserMock()
+        result = PackerConfig("/").base_dir(full_path=True)
+        self.assertTrue(os.path.isabs(result))
+
     """ packer_file() """
 
     def test_packer_file_default_on_missing_file(self):
@@ -141,7 +142,7 @@ class ConfigTest(unittest.TestCase):
         result = PackerConfig("/").packer_file()
         self.assertTrue(len(result) > 0)
 
-    def test_packer_file_empty_value(self):
+    def test_packer_file_value(self):
         self.config_parser.return_value = ConfigParserMock(
             sections=['packer'],
             content={'packer': {'packer_file': 'test_file'}}

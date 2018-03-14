@@ -34,19 +34,18 @@ class TerraformConfig:
     Terraform Section Configuration
     """
     def __init__(self, repo_base):
-        if repo_base is None or not is_git_repo(repo_base):
-            raise ValueError("Not a GIT repository: %s" % repo_base)
+        if not os.path.isdir(repo_base):
+            raise ValueError("Not a valid path: %s" % repo_base)
         self._repo_base = repo_base
 
         self.config_file = os.path.join(self._repo_base, self.config_file())
-
-        # Configuration section
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
         if "terraform" not in self.config.sections():
-            raise LookupError("Terraform configuration section doesn't exist in %s." % self.config_file)
-
-        self._terraform = self.config['terraform']
+            self.config = None
+            self._terraform = None
+        else:
+            self._terraform = self.config['terraform']
 
     @staticmethod
     def config_file():
@@ -59,24 +58,39 @@ class TerraformConfig:
         """
         Base directory of Terraform
         """
-        base_dir = self._terraform.get("base_dir", "terraform")
+        result = "terraform"
+
+        if self._terraform is not None:
+            result = self._terraform.get("base_dir", result)
+
         if full_path:
-            base_dir = os.path.join(self._repo_base, base_dir)
-        return base_dir
+            result = os.path.join(self._repo_base, result)
+
+        return result
 
     def environments_dir(self, full_path=False):
         """
         Directory containing the environments
         """
-        environments_dir = self._terraform.get("environments_dir", "environments")
+        result = "environments"
+
+        if self._terraform is not None:
+            result = self._terraform.get("environments_dir", result)
+
         if full_path:
-            environments_dir = os.path.join(self._repo_base, environments_dir)
-        return environments_dir
+            result = os.path.join(self._repo_base, result)
+
+        return result
 
     def state_file(self):
         """
         Name of the Terraform state file
         """
-        return self._terraform.get("state_file", "terraform.tfstate")
+        result = "terraform.tfstate"
+
+        if self._terraform is not None:
+            result = self._terraform.get("state_file", result)
+
+        return result
 
 # vim: ft=python:ts=4:sw=4

@@ -35,19 +35,19 @@ class AnsibleConfig:
     Ansible Section Configuration
     """
     def __init__(self, repo_base):
-        if repo_base is None or not is_git_repo(repo_base):
-            raise ValueError("Not a GIT repository: %s" % repo_base)
+        if not os.path.isdir(repo_base):
+            raise ValueError("Not a valid path: %s" % repo_base)
         self._repo_base = repo_base
 
         self.config_file = os.path.join(self._repo_base, self.config_file())
-
-        # Configuration section
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
         if "ansible" not in self.config.sections():
-            raise LookupError("Ansible configuration section doesn't exist in %s." % self.config_file)
+            self.config = None
+            self._ansible = None
+        else:
+            self._ansible = self.config['ansible']
 
-        self._ansible = self.config['ansible']
 
     @staticmethod
     def config_file():
@@ -60,10 +60,15 @@ class AnsibleConfig:
         """
         Base directory of Ansible
         """
-        base_dir = self._ansible.get("base_dir", "ansible")
+        result = "ansible"
+
+        if self._ansible is not None:
+            result = self._ansible.get("base_dir", result)
+
         if full_path:
-            base_dir = os.path.join(self._repo_base, base_dir)
-        return base_dir
+            result = os.path.join(self._repo_base, result)
+
+        return result
 
     def roles_dir(self, full_path=False):
         """
