@@ -48,7 +48,6 @@ class AnsibleConfig:
         else:
             self._ansible = self.config['ansible']
 
-
     @staticmethod
     def config_file():
         """
@@ -74,69 +73,105 @@ class AnsibleConfig:
         """
         Directory containing the roles
         """
-        roles_dir = self._ansible.get("roles_dir", "roles")
+        result = "roles"
+
+        if self._ansible is not None:
+            result = self._ansible.get("roles_dir", result)
+
         if full_path:
-            roles_dir = os.path.join(self.base_dir(True), roles_dir)
-        return roles_dir
+            result = os.path.join(self.base_dir(True), result)
+
+        return result
 
     def playbooks_dir(self, full_path=False):
         """
         Directory containing the playbooks
         """
-        playbooks_dir = self._ansible.get("playbooks_dir", "playbooks")
+        result = "playbooks"
+
+        if self._ansible is not None:
+            result = self._ansible.get("playbooks_dir", result)
+
         if full_path:
-            playbooks_dir = os.path.join(self.base_dir(True), playbooks_dir)
-        return playbooks_dir
+            result = os.path.join(self.base_dir(True), result)
+
+        return result
 
     def inventories_dir(self, full_path=False):
         """
         Directory containing the inventories
         """
-        inventories_dir = self._ansible.get("inventories_dir", "inventories")
+        result = "inventories"
+
+        if self._ansible is not None:
+            result = self._ansible.get("inventories_dir", result)
+
         if full_path:
-            inventories_dir = os.path.join(self.base_dir(True), inventories_dir)
-        return inventories_dir
+            result = os.path.join(self.base_dir(True), result)
+
+        return result
 
     def run_as(self):
         """
         User used to run Ansible
         """
-        return self._ansible.get("run_as", None)
+        result = None
+        if self._ansible is not None:
+            result = self._ansible.get("run_as", result)
+        return result
 
     def dynamic_inventory_file(self):
         """
         Name of the dynamic inventory script file
         """
-        return self._ansible.get("dynamic_inventory_file", "inventory")
+        result = "inventory"
+        if self._ansible is not None:
+            result = self._ansible.get("dynamic_inventory_file", result)
+        return result
 
     def vault_file(self):
         """
         Name of the file containing the Ansible Vault password
         """
-        return self._ansible.get("vault_file", "vault.txt")
+        result = "vault.txt"
+        if self._ansible is not None:
+            result = self._ansible.get("vault_file", result)
+        return result
 
     def ssh_key_file(self):
         """
         Name of the SSH private key used to connect to the remote machines
         """
-        return self._ansible.get("ssh_key_file", "access_key.pem")
+        result = "access_key.pem"
+        if self._ansible is not None:
+            result = self._ansible.get("ssh_key_file", result)
+        return result
 
     def exec_ansible(self):
         """
         Executable for "ansible-ansible"
         """
-        return self._ansible.get("exec_ansible", "ansible")
+        result = "ansible"
+        if self._ansible is not None:
+            result = self._ansible.get("exec_ansible", result)
+        return result
 
     def exec_ansible_playbook(self):
         """
         Executable for "ansible-playbook"
         """
-        return self._ansible.get("exec_ansible_playbook", "ansible-playbook")
+        result = "ansible-playbook"
+        if self._ansible is not None:
+            result = self._ansible.get("exec_ansible_playbook", result)
+        return result
 
     def exec_ansible_vault(self):
         """
         Executable for "ansible-vault"
         """
-        return self._ansible.get("exec_ansible_vault", "ansible-vault")
+        result = "ansible-vault"
+        if self._ansible is not None:
+            result = self._ansible.get("exec_ansible_vault", result)
+        return result
 
 # vim: ft=python:ts=4:sw=4

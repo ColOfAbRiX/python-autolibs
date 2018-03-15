@@ -73,7 +73,8 @@ class ConfigTest(unittest.TestCase):
 
     """ Creation """
 
-    def test_missing_repo_root(self):
+    @patch('os.path.isdir', return_value=False)
+    def test_missing_repo_root(self, *args):
         with self.assertRaises(ValueError):
             result = Config("bad_path")
 

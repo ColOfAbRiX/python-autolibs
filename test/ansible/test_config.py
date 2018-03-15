@@ -62,7 +62,8 @@ class ConfigTest(unittest.TestCase):
 
     """ Creation """
 
-    def test_missing_repo_root(self):
+    @patch('os.path.isdir', return_value=False)
+    def test_missing_repo_root(self, *args):
         with self.assertRaises(ValueError):
             result = AnsibleConfig("bad_path")
 
@@ -122,3 +123,288 @@ class ConfigTest(unittest.TestCase):
         self.config_parser.return_value = ConfigParserMock()
         result = AnsibleConfig("/").base_dir(full_path=True)
         self.assertTrue(os.path.isabs(result))
+
+    """ roles_dir(self, full_path) """
+
+    def test_roles_dir_default_on_missing_file(self):
+        result = AnsibleConfig("/").roles_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_roles_dir_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").roles_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_roles_dir_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").roles_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_roles_dir_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'roles_dir': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").roles_dir()
+        self.assertEquals(result, 'test_dir')
+
+    def test_roles_dir_value_abspath(self):
+        self.config_parser.return_value = ConfigParserMock()
+        result = AnsibleConfig("/").roles_dir(full_path=True)
+        self.assertTrue(os.path.isabs(result))
+
+    """ playbooks_dir(self, full_path) """
+
+    def test_playbooks_dir_default_on_missing_file(self):
+        result = AnsibleConfig("/").playbooks_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_playbooks_dir_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").playbooks_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_playbooks_dir_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").playbooks_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_playbooks_dir_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'playbooks_dir': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").playbooks_dir()
+        self.assertEquals(result, 'test_dir')
+
+    def test_playbooks_dir_value_abspath(self):
+        self.config_parser.return_value = ConfigParserMock()
+        result = AnsibleConfig("/").playbooks_dir(full_path=True)
+        self.assertTrue(os.path.isabs(result))
+
+    """ inventories_dir(self, full_path) """
+
+    def test_inventories_dir_default_on_missing_file(self):
+        result = AnsibleConfig("/").inventories_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_inventories_dir_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").inventories_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_inventories_dir_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").inventories_dir()
+        self.assertTrue(len(result) > 0)
+
+    def test_inventories_dir_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'inventories_dir': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").inventories_dir()
+        self.assertEquals(result, 'test_dir')
+
+    def test_inventories_dir_value_abspath(self):
+        self.config_parser.return_value = ConfigParserMock()
+        result = AnsibleConfig("/").inventories_dir(full_path=True)
+        self.assertTrue(os.path.isabs(result))
+
+    """ run_as(self) """
+
+    def test_run_as_default_on_missing_file(self):
+        result = AnsibleConfig("/").run_as()
+        self.assertIsNone(result)
+
+    def test_run_as_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").run_as()
+        self.assertIsNone(result)
+
+    def test_run_as_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").run_as()
+        self.assertIsNone(result)
+
+    def test_run_as_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'run_as': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").run_as()
+        self.assertEquals(result, 'test_dir')
+
+    """ dynamic_inventory_file(self) """
+
+    def test_dynamic_inventory_file_default_on_missing_file(self):
+        result = AnsibleConfig("/").dynamic_inventory_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_dynamic_inventory_file_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").dynamic_inventory_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_dynamic_inventory_file_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").dynamic_inventory_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_dynamic_inventory_file_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'dynamic_inventory_file': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").dynamic_inventory_file()
+        self.assertEquals(result, 'test_dir')
+
+    """ vault_file(self) """
+
+    def test_vault_file_default_on_missing_file(self):
+        result = AnsibleConfig("/").vault_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_vault_file_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").vault_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_vault_file_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").vault_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_vault_file_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'vault_file': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").vault_file()
+        self.assertEquals(result, 'test_dir')
+
+    """ ssh_key_file(self) """
+
+    def test_ssh_key_file_default_on_missing_file(self):
+        result = AnsibleConfig("/").ssh_key_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_ssh_key_file_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").ssh_key_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_ssh_key_file_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").ssh_key_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_ssh_key_file_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'ssh_key_file': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").ssh_key_file()
+        self.assertEquals(result, 'test_dir')
+
+    """ exec_ansible(self) """
+
+    def test_exec_ansible_default_on_missing_file(self):
+        result = AnsibleConfig("/").exec_ansible()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").exec_ansible()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").exec_ansible()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'exec_ansible': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").exec_ansible()
+        self.assertEquals(result, 'test_dir')
+
+    """ exec_ansible_playbook(self) """
+
+    def test_exec_ansible_playbook_default_on_missing_file(self):
+        result = AnsibleConfig("/").exec_ansible_playbook()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_playbook_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").exec_ansible_playbook()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_playbook_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").exec_ansible_playbook()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_playbook_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'exec_ansible_playbook': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").exec_ansible_playbook()
+        self.assertEquals(result, 'test_dir')
+
+    """ exec_ansible_vault(self) """
+
+    def test_exec_ansible_vault_default_on_missing_file(self):
+        result = AnsibleConfig("/").exec_ansible_vault()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_vault_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = AnsibleConfig("/").exec_ansible_vault()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_vault_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {}}
+        )
+        result = AnsibleConfig("/").exec_ansible_vault()
+        self.assertTrue(len(result) > 0)
+
+    def test_exec_ansible_vault_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['ansible'],
+            content={'ansible': {'exec_ansible_vault': 'test_dir'}}
+        )
+        result = AnsibleConfig("/").exec_ansible_vault()
+        self.assertEquals(result, 'test_dir')

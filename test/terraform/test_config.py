@@ -62,7 +62,8 @@ class ConfigTest(unittest.TestCase):
 
     """ Creation """
 
-    def test_missing_repo_root(self):
+    @patch('os.path.isdir', return_value=False)
+    def test_missing_repo_root(self, *args):
         with self.assertRaises(ValueError):
             result = TerraformConfig("bad_path")
 
@@ -157,3 +158,30 @@ class ConfigTest(unittest.TestCase):
         )
         result = TerraformConfig("/").environments_dir(full_path=True)
         self.assertTrue(os.path.isabs(result))
+
+    """ state_file() """
+
+    def test_state_file_default_on_missing_file(self):
+        result = TerraformConfig("/").state_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_state_file_default_on_missing_section(self):
+        self.config_parser.return_value = ConfigParserMock(sections=[])
+        result = TerraformConfig("/").state_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_state_file_default_on_missing_key(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['terraform'],
+            content={'terraform': {}}
+        )
+        result = TerraformConfig("/").state_file()
+        self.assertTrue(len(result) > 0)
+
+    def test_state_file_value(self):
+        self.config_parser.return_value = ConfigParserMock(
+            sections=['terraform'],
+            content={'terraform': {'state_file': 'test_file'}}
+        )
+        result = TerraformConfig("/").state_file()
+        self.assertEquals(result, 'test_file')
