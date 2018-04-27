@@ -26,7 +26,7 @@ from __future__ import print_function
 
 import os
 import config
-from cfutils import gitutils
+from autolibs.utils import gitutils
 
 
 class TerraformRepo:

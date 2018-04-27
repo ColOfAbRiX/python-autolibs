@@ -35,10 +35,10 @@ from autolibs.repository import RepoInfo
 class RepoInfoTest(unittest.TestCase):
 
     def setUp(self):
-        self.get_git_root_patch = patch('cfutils.gitutils.get_git_root')
+        self.get_git_root_patch = patch('autolibs.utils.gitutils.get_git_root')
         self.get_git_root = self.get_git_root_patch.start()
 
-        self.is_git_repo_patch = patch('cfutils.gitutils.is_git_repo')
+        self.is_git_repo_patch = patch('autolibs.utils.gitutils.is_git_repo')
         self.is_git_repo = self.is_git_repo_patch.start()
 
     def tearDown(self):

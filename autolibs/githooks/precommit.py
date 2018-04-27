@@ -28,8 +28,8 @@ from __future__ import print_function
 import os
 import sys
 
-from cfutils.execute import *
-from cfutils.formatting import *
+from autolibs.utils.execute import *
+from autolibs.utils.formatting import *
 from autolibs.config import Config
 from packer import precommit as packer
 from autolibs.repository import RepoInfo

@@ -32,9 +32,9 @@ import uuid
 import json
 
 from stat import *
-from cfutils.common import *
-from cfutils.execute import *
-from cfutils.formatting import print_c
+from autolibs.utils.common import *
+from autolibs.utils.execute import *
+from autolibs.utils.formatting import print_c
 
 
 class DeployConfig:

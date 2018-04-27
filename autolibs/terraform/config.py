@@ -26,7 +26,7 @@ from __future__ import print_function
 
 import os
 import configparser
-from cfutils.gitutils import *
+from autolibs.utils.gitutils import *
 
 
 class TerraformConfig:

@@ -30,7 +30,7 @@ import config
 import packer
 import ansible
 import terraform
-from cfutils import gitutils
+from autolibs.utils import gitutils
 from git.exc import NoSuchPathError
 
 

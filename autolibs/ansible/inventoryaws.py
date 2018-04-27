@@ -58,7 +58,7 @@ import boto3
 import argparse
 import configparser
 from stat import *
-from cfutils import *
+from autolibs.utils import *
 
 
 def load_credentials():

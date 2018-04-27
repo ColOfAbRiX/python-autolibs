@@ -38,7 +38,6 @@ The package installs system wide GIT hooks to perform checks on the repository. 
 
 The package requires the following additional python packages:
 
-- **cfutils**
 - **configparser2**
 - **ansible** from version 2.0.0 up to version 2.3.x
 

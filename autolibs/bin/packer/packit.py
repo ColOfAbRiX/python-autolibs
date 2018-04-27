@@ -30,7 +30,7 @@ import argparse
 import tempfile
 
 
-from cfutils.execute import *
+from autolibs.utils.execute import *
 from autolibs.packer.tools import *
 from autolibs.terraform.repository import TerraformRepo
 

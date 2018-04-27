@@ -23,37 +23,46 @@
 # SOFTWARE.
 #
 
-from __future__ import print_function
-
-import re
 import os
-import sys
-import yaml
+import git
 
-from autolibs.utils.common import *
-from autolibs.utils.gitutils import *
-from autolibs.utils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
+from execute import exec_cmd
 
 
-def pre_commit():
-    repo = AnsibleRepo()
+def is_git_repo(path=None):
+    """
+    Checks if the current directory is part of a GIT repository
+    """
+    if path is None:
+        path = os.getcwd()
 
-    print_c(" Packer", color='white')
-    print_c("-" * 40, color='white')
-
-    print("Check status: ", end='')
-    print_c("ALLOWED\n", color="light_green")
+    try:
+        git_repo = git.Repo(path, search_parent_directories=True)
+    except git.exc.InvalidGitRepositoryError:
+        return False
 
     return True
 
+def get_git_root(path=None):
+    """
+    Returns the root path of the GIT repository on the Current Working Directory
+    """
+    if path is None:
+        path = os.getcwd()
 
-def main():
-    print_c("GIT Pre Commit Checks\n".center(40), color='white')
-    pre_commit()
+    git_repo = git.Repo(path, search_parent_directories=True)
+    return git_repo.git.rev_parse("--show-toplevel")
 
 
-if __name__ == '__main__':
-    main()
+def exec_git(git_cmd):
+    """
+    Executes GIT with specific options and manages errors.
+    """
+    stdout, stderr, rc = exec_cmd("git %s" % git_cmd)
+
+    if rc > 0:
+        raise ScriptError("Error running command: \"git %s\"\nOutput: %s" % (git_cmd, stderr))
+
+    return stdout
 
 # vim: ft=python:ts=4:sw=4

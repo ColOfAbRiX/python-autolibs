@@ -30,9 +30,9 @@ import os
 import sys
 import yaml
 
-from cfutils.common import *
-from cfutils.gitutils import *
-from cfutils.formatting import print_c
+from autolibs.utils.common import *
+from autolibs.utils.gitutils import *
+from autolibs.utils.formatting import print_c
 from autolibs.ansible.repository import AnsibleRepo
 
 

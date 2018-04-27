@@ -28,10 +28,10 @@ from __future__ import print_function
 import re
 import sys
 
-from cfutils.common import *
-from cfutils.execute import *
-from cfutils.gitutils import *
-from cfutils.formatting import print_c
+from autolibs.utils.common import *
+from autolibs.utils.execute import *
+from autolibs.utils.gitutils import *
+from autolibs.utils.formatting import print_c
 
 
 def commit_msg(commit_msg):

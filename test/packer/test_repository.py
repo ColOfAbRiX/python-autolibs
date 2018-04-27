@@ -56,7 +56,7 @@ class PackerRepoTest(unittest.TestCase):
         Builds a PackerRepo instance mocking all its constructor checks with working or given values
         """
         # Mock to check if the GIT repo root is valid
-        is_git_repo_patch = patch('cfutils.gitutils.is_git_repo')
+        is_git_repo_patch = patch('autolibs.utils.gitutils.is_git_repo')
         is_git_repo = is_git_repo_patch.start()
         is_git_repo.return_value = True if mck_is_git_repo is None else mck_is_git_repo
 
@@ -66,7 +66,7 @@ class PackerRepoTest(unittest.TestCase):
         pakconfig.return_value = PackerConfigMock() if mck_pak_config is None else mck_pak_config
 
         # Mock to get the GIT repo root
-        get_git_root_patch = patch('cfutils.gitutils.get_git_root')
+        get_git_root_patch = patch('autolibs.utils.gitutils.get_git_root')
         get_git_root = get_git_root_patch.start()
         get_git_root.return_value = "/repo_path" if mck_repo_root is None else mck_repo_root
 

@@ -44,16 +44,19 @@ class PostInstallCommand(install):
 
 setup(
     name='autolibs',
-    version='1.3.4',
+    version='1.4.0',
     author='Fabrizio Colonna',
     author_email='colofabrix@tin.it',
-    url='https://github.com/ColOfAbRiX',
+    url='https://github.com/ColOfAbRiX/python-autolibs',
     description='Python Automation Tools',
     long_description=open('README.md').read(),
     license='MIT',
     packages=setuptools.find_packages(),
     install_requires=[
-        'cfutils',
+        'mock',
+        'colored',
+        'pycrypto',
+        'GitPython',
         'configparser2',
         'ansible >=2.0.0, <2.4.0'
     ],

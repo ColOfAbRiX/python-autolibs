@@ -23,37 +23,33 @@
 # SOFTWARE.
 #
 
-from __future__ import print_function
+import logging
 
-import re
-import os
-import sys
-import yaml
+log_indent = 0
+log_status = None
 
-from autolibs.utils.common import *
-from autolibs.utils.gitutils import *
-from autolibs.utils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
+def logfunction(func):
+    def _wrapper(*args, **kwargs):
+        global log_indent, log_status
 
+        indent = "  " * log_indent
 
-def pre_commit():
-    repo = AnsibleRepo()
+        if log_status is None:
+            logging.basicConfig(filename='/tmp/python-logging.log', level=logging.DEBUG)
+            log_status = 1
 
-    print_c(" Packer", color='white')
-    print_c("-" * 40, color='white')
+        logging.info(indent + "Name   : %s" % func.__name__)
+        logging.debug(indent + "Args #1: %s" % str(args))
+        logging.debug(indent + "Args #2: %s" % str(kwargs))
 
-    print("Check status: ", end='')
-    print_c("ALLOWED\n", color="light_green")
+        log_indent += 1
+        result = func(*args, **kwargs)
+        log_indent -= 1
 
-    return True
+        logging.debug(indent + "Result : %s" % str(result))
 
+        return result
 
-def main():
-    print_c("GIT Pre Commit Checks\n".center(40), color='white')
-    pre_commit()
-
-
-if __name__ == '__main__':
-    main()
+    return _wrapper
 
 # vim: ft=python:ts=4:sw=4

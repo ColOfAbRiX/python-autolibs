@@ -127,8 +127,8 @@ import copy
 import json
 import StringIO
 from repository import *
-from cfutils.execute import *
-from cfutils.formatting import *
+from autolibs.utils.execute import *
+from autolibs.utils.formatting import *
 
 
 class YAMLInventory(object):

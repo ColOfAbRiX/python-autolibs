@@ -24,36 +24,42 @@
 #
 
 from __future__ import print_function
-
-import re
-import os
-import sys
-import yaml
-
-from autolibs.utils.common import *
-from autolibs.utils.gitutils import *
-from autolibs.utils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
+import crypt
+import fcntl
+import socket
+import struct
 
 
-def pre_commit():
-    repo = AnsibleRepo()
+def network_info():
+    """ Retrieves the network configuration of the host """
+    output = {'ip': '127.0.0.1', 'netmask': '255.0.0.0', 'iface': '', 'gateway': ''}
 
-    print_c(" Packer", color='white')
-    print_c("-" * 40, color='white')
+    # Default interface and gateway
+    with open("/proc/net/route") as f:
+        for line in f.readlines():
+            try:
+                iface, dest, gateway, flags, _, _, _, _, _, _, _, =  line.strip().split()
+                if dest != '00000000' or not int(flags, 16) & 2:
+                    continue
+                output['iface'] = iface
+                output['gateway'] = socket.inet_ntoa(struct.pack("<L", int(gateway, 16)))
+            except:
+                continue
 
-    print("Check status: ", end='')
-    print_c("ALLOWED\n", color="light_green")
+    # IP Address and netmask
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Doesn't even have to be reachable
+        s.connect(('10.255.255.255', 0))
+        output['ip'] = s.getsockname()[0]
+        output['netmask'] = socket.inet_ntoa(fcntl.ioctl(
+            socket.socket(socket.AF_INET, socket.SOCK_DGRAM),
+            35099,
+            struct.pack('256s', output['iface'])
+        )[20:24])
+    finally:
+        s.close()
 
-    return True
-
-
-def main():
-    print_c("GIT Pre Commit Checks\n".center(40), color='white')
-    pre_commit()
-
-
-if __name__ == '__main__':
-    main()
+    return output
 
 # vim: ft=python:ts=4:sw=4

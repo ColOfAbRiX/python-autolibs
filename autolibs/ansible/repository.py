@@ -33,9 +33,9 @@ import sys
 import yaml
 import glob
 import config
-from cfutils import gitutils
-from cfutils.common import *
-from cfutils.execute import *
+from autolibs.utils import gitutils
+from autolibs.utils.common import *
+from autolibs.utils.execute import *
 from ansible import constants as C
 
 

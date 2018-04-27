@@ -29,7 +29,7 @@ import json
 import tools
 import tempfile
 
-from cfutils.execute import *
+from autolibs.utils.execute import *
 from repository import PackerRepo
 
 

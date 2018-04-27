@@ -23,37 +23,11 @@
 # SOFTWARE.
 #
 
-from __future__ import print_function
-
-import re
-import os
-import sys
-import yaml
-
-from autolibs.utils.common import *
-from autolibs.utils.gitutils import *
-from autolibs.utils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
-
-
-def pre_commit():
-    repo = AnsibleRepo()
-
-    print_c(" Packer", color='white')
-    print_c("-" * 40, color='white')
-
-    print("Check status: ", end='')
-    print_c("ALLOWED\n", color="light_green")
-
-    return True
-
-
-def main():
-    print_c("GIT Pre Commit Checks\n".center(40), color='white')
-    pre_commit()
-
-
-if __name__ == '__main__':
-    main()
+from .formatting import *
+from .gitutils import *
+from .execute import *
+from .sysinfo import *
+from .common import *
+from .debug import *
 
 # vim: ft=python:ts=4:sw=4

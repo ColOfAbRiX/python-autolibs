@@ -33,9 +33,9 @@ import re
 import sys
 import argparse
 
-from cfutils.common import *
-from cfutils.execute import exec_cmd
-from cfutils.formatting import print_c
+from autolibs.utils.common import *
+from autolibs.utils.execute import exec_cmd
+from autolibs.utils.formatting import print_c
 from autolibs.ansible.repository import AnsibleRepo
 
 

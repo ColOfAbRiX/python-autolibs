@@ -32,8 +32,8 @@ import sys
 import glob
 import argparse
 
-from cfutils.execute import *
-from cfutils.formatting import print_c
+from autolibs.utils.execute import *
+from autolibs.utils.formatting import print_c
 from autolibs.ansible.deploy import DeployConfig
 from autolibs.ansible.repository import AnsibleRepo
 
