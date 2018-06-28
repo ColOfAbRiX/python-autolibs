@@ -26,11 +26,10 @@ from __future__ import print_function
 
 import re
 import json
-import tools
 import tempfile
 
 from autolibs.utils.execute import *
-from repository import PackerRepo
+from autolibs.packer.repository import PackerRepo
 
 
 def run_packer(config, image, dry_run=False):

@@ -7,6 +7,7 @@
 /.idea
 
 # Python and other junk files
+__pycache__
 *.egg-info
 .*.swp
 *.pyc

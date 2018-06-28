@@ -26,12 +26,9 @@ from __future__ import print_function
 
 import os
 import git
-import config
-import packer
-import ansible
-import terraform
-from autolibs.utils import gitutils
 from git.exc import NoSuchPathError
+from autolibs.utils import gitutils
+from autolibs import config, packer, ansible, terraform
 
 
 class RepoInfo:

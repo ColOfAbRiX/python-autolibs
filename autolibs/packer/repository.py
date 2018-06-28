@@ -25,7 +25,7 @@
 from __future__ import print_function
 
 import os
-import config
+from autolibs.packer import config
 from autolibs.utils import gitutils
 
 

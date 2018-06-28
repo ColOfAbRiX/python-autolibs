@@ -28,7 +28,6 @@ import os
 import shlex
 import getpass
 import subprocess as sp
-from common import ScriptError
 
 
 def paths_full(*chunks):

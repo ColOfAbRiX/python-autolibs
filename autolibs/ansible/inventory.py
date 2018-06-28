@@ -125,10 +125,13 @@ import glob
 import time
 import copy
 import json
-import StringIO
-from repository import *
+try:
+    import StringIO
+except ImportError:
+    from io import StringIO
 from autolibs.utils.execute import *
 from autolibs.utils.formatting import *
+from autolibs.ansible.repository import *
 
 
 class YAMLInventory(object):
@@ -372,7 +375,7 @@ class YAMLInventory(object):
                     host_list   = self._merge_import_objs(host_list, i_hosts)
                     global_vars = merge(global_vars, i_vars)
 
-        except (IOError, yaml.YAMLError), exc:
+        except (IOError, yaml.YAMLError) as exc:
             raise Exception("Error loading file file %s: %s." % (file_path, exc))
 
         # This is to load the custom override YAML only as a last thing and only once

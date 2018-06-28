@@ -25,10 +25,8 @@
 from __future__ import print_function
 
 import os
-import packer
-import ansible
-import terraform
 import configparser
+from autolibs import packer, ansible, terraform
 
 
 class Config:

@@ -31,6 +31,7 @@ from __future__ import print_function
 import os
 import re
 import sys
+import stat
 import argparse
 
 from autolibs.utils.common import *
@@ -103,7 +104,7 @@ def vault(valut_type, action, environment, target, kwargs):
         print_c(stderr, color="light_red")
     else:
         print("Done")
-        os.chmod(target_path, 0664)
+        os.chmod(target_path, stat.S_IREAD + stat.S_IWRITE + stat.S_IRGRP + stat.S_IWUSR + stat.S_IROTH)
     exit(rc)
 
 

@@ -32,11 +32,11 @@ import os
 import sys
 import yaml
 import glob
-import config
+from ansible import constants as C
+from autolibs.ansible import config
 from autolibs.utils import gitutils
 from autolibs.utils.common import *
 from autolibs.utils.execute import *
-from ansible import constants as C
 
 
 class AnsibleRepo:

@@ -27,7 +27,6 @@ from __future__ import print_function
 import crypt
 import random
 import string
-import urllib2
 from operator import *
 from itertools import *
 try:
@@ -165,20 +164,5 @@ def sha512_crypt(password, rounds):
     rounds = max(1000, min(999999999, rounds or 5000))
     prefix = '$6$rounds={0}$'.format(rounds)
     return crypt.crypt(password, prefix + random_string(8))
-
-
-def rest_request(url, data={}):
-    """
-    Makes a REST call to the server optionally sending JSON data
-    """
-    try:
-        data = json.load(
-            urllib2.urlopen(url, data=json.dumps(data), timeout=5)
-        )
-    except (urllib2.HTTPError, urllib2.URLError, ValueError) as e:
-        raise ScriptError(e.message)
-
-    return data
-
 
 # vim: ft=python:ts=4:sw=4

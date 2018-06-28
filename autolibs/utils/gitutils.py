@@ -26,7 +26,7 @@
 import os
 import git
 
-from execute import exec_cmd
+#from execute import exec_cmd
 
 
 def is_git_repo(path=None):

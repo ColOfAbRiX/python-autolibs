@@ -25,8 +25,8 @@
 from __future__ import print_function
 
 import os
-import config
 from autolibs.utils import gitutils
+from autolibs.terraform import config
 
 
 class TerraformRepo:
