@@ -29,6 +29,7 @@ from __future__ import print_function
 
 import sys
 import argparse
+from autolibs.utils.common import *
 from autolibs.utils.formatting import *
 from autolibs.ansible.inventory import *
 from autolibs.ansible.repository import *

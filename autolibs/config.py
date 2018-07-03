@@ -82,6 +82,6 @@ class Config:
         if self._repository is not None:
             result = self._repository.get("secret_files", result)
 
-        return filter(None, result.split(','))
+        return list(filter(None, result.split(',')))
 
 # vim: ft=python:ts=4:sw=4

@@ -28,11 +28,12 @@ from __future__ import print_function
 import re
 import sys
 
+from autolibs.utils.common import *
 from autolibs.utils.execute import *
 from autolibs.utils.gitutils import *
 from autolibs.utils.formatting import print_c
-from autolibs.ansible.repository import AnsibleRepo
 from autolibs.ansible.deploy import DeployConfig
+from autolibs.ansible.repository import AnsibleRepo
 
 
 def pre_push():

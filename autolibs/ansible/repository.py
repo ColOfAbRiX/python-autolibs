@@ -37,6 +37,10 @@ from autolibs.ansible import config
 from autolibs.utils import gitutils
 from autolibs.utils.common import *
 from autolibs.utils.execute import *
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
 
 
 class AnsibleRepo:
@@ -163,7 +167,7 @@ class AnsibleRepo:
                 name = paths_full(root, name)
                 try:
                     with open(name) as f:
-                        if re.findall(r'^\$ANSIBLE_VAULT;[^;]+;[^;]+$', f.readline()):
+                        if re.findall(r'^\$ANSIBLE_VAULT;[^;]+;[^;]+$', str(f.readline())):
                             self._vaults.append(name)
                 except (OSError, IOError):
                     continue
@@ -182,7 +186,7 @@ class AnsibleRepo:
         for task_file in glob.glob(paths_full(self.roles_base, "*/tasks/*.yml")):
             try:
                 with open(task_file, "r") as f:
-                    doc = yaml.load(f, Loader=yaml.CLoader)
+                    doc = yaml.load(f)
                     # Check it's proper Ansible-YAML
                     if not isinstance(doc, (list, )):
                         continue

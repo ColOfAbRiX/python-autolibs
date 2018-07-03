@@ -23,100 +23,98 @@
 # SOFTWARE.
 #
 
-#
-# Custom dynamic inventory script for Ansible that uses YAML to store hosts. The script
-# will first load the file inventories/main.yml from the repository base.
-# For more information see: https://docs.ansible.com/ansible/developing_inventory.html
-#
+"""
+Custom dynamic inventory script for Ansible that uses YAML to store hosts. The script
+will first load the file inventories/main.yml from the repository base.
+For more information see: https://docs.ansible.com/ansible/developing_inventory.html
 
-#
-# A comprehensive and simple example of an inventory that can be used is:
-#
-#    ---
-#    # The script can import files and directories, using BASH expansion.
-#    # The loading happens sequentially following the list. Nested files are
-#    # merged over the parent ones.
-#    import: [ 'other_file.yml', 'other_dir/', 'wildcard*' ]
-#
-#    # The executables described here will be executed and their YAML output
-#    # be included the same way as with the "import" statement. The loading
-#    # happens sequentially following the list. The items loaded with this
-#    # statement overrides the "import" statement
-#    executables:
-#     - path: inventory-aws
-#       args: ["-r eu-west-2"]
-#       working_dir: "."
-#       environment:  {}
-#
-#    # Hosts section
-#    hosts:
-#      - name: "vmtest01"
-#        memberof: ["linux"]
-#        # Name of the host. It's the only required field.
-#      - name: "vmtest02"
-#        # Groups that this host belongs to
-#        memberof: ["redhat_7", "linux"]
-#        # Variables assigned only to this host
-#        vars: { custom_host_var: "Only for vmtest02" }
-#
-#    # Groups section
-#    groups:
-#     - name: "linux"
-#       vars: { custom_group_var: "All linux group members" }
-#       # Name of the group. It's the only required field.
-#     - name: "redhat_7"
-#       # The group can be member of other groups. The script
-#       # avoids circular references.
-#       memberof: [ "linux" ]
-#       # A description for the group
-#       description: "RedHat 7"
-#       # Groups can be categorized to assign them a meaning
-#       type: "linux_distribution"
-#
-#    # Global variables
-#    vars:
-#      global_var_1: "This variable is available to all hosts"
-#      global_var_2: "And also this one"
-#
-# The above inventory, assuming the includes empty, generates the following
-# JSON host data for Ansible when called with .get_list():
-#
-#     {
-#       "_meta": {
-#         "hostvars": {
-#           "vmtest01": {
-#             "custom_group_var": "All linux group members",
-#             "generic": [
-#               {"description": "linux", "name": "linux"},
-#               {"description": "Ungrouped Hosts", "name": "ungrouped"}
-#             ],
-#             "global_var_1": "This variable is available to all hosts",
-#             "global_var_2": "And also this one",
-#             "group_types": ["generic", "linux_distribution"],
-#             "linux_distribution": [{"description": "RedHat 7", "name": "redhat_7"}],
-#             "memberof": ["linux"]
-#           },
-#           "vmtest02": {
-#             "custom_group_var": "All linux group members",
-#             "custom_host_var": "Only for vmtest02",
-#             "generic": [
-#               {"description": "linux", "name": "linux"},
-#               {"description": "Ungrouped Hosts", "name": "ungrouped"}
-#             ],
-#             "global_var_1": "This variable is available to all hosts",
-#             "global_var_2": "And also this one",
-#             "group_types": ["generic", "linux_distribution"],
-#             "linux_distribution": [{"description": "RedHat 7", "name": "redhat_7"}],
-#             "memberof": ["redhat_7", "linux"]
-#           }
-#         }
-#       }
-#     }
-#
-# The script has the ability of let user override the loaded data using passing
-# a YAML document as environment variable. The document will be treated as the
-# last imported document and as such it has the highest priority over the others.
-#
+A comprehensive and simple example of an inventory that can be used is:
+
+   ---
+   # The script can import files and directories, using BASH expansion.
+   # The loading happens sequentially following the list. Nested files are
+   # merged over the parent ones.
+   import: [ 'other_file.yml', 'other_dir/', 'wildcard*' ]
+
+   # The executables described here will be executed and their YAML output
+   # be included the same way as with the "import" statement. The loading
+   # happens sequentially following the list. The items loaded with this
+   # statement overrides the "import" statement
+   executables:
+    - path: inventory-aws
+      args: ["-r eu-west-2"]
+      working_dir: "."
+      environment:  {}
+
+   # Hosts section
+   hosts:
+     - name: "vmtest01"
+       memberof: ["linux"]
+       # Name of the host. It's the only required field.
+     - name: "vmtest02"
+       # Groups that this host belongs to
+       memberof: ["redhat_7", "linux"]
+       # Variables assigned only to this host
+       vars: { custom_host_var: "Only for vmtest02" }
+
+   # Groups section
+   groups:
+    - name: "linux"
+      vars: { custom_group_var: "All linux group members" }
+      # Name of the group. It's the only required field.
+    - name: "redhat_7"
+      # The group can be member of other groups. The script
+      # avoids circular references.
+      memberof: [ "linux" ]
+      # A description for the group
+      description: "RedHat 7"
+      # Groups can be categorized to assign them a meaning
+      type: "linux_distribution"
+
+   # Global variables
+   vars:
+     global_var_1: "This variable is available to all hosts"
+     global_var_2: "And also this one"
+
+The above inventory, assuming the includes empty, generates the following
+JSON host data for Ansible when called with .get_list():
+
+    {
+      "_meta": {
+        "hostvars": {
+          "vmtest01": {
+            "custom_group_var": "All linux group members",
+            "generic": [
+              {"description": "linux", "name": "linux"},
+              {"description": "Ungrouped Hosts", "name": "ungrouped"}
+            ],
+            "global_var_1": "This variable is available to all hosts",
+            "global_var_2": "And also this one",
+            "group_types": ["generic", "linux_distribution"],
+            "linux_distribution": [{"description": "RedHat 7", "name": "redhat_7"}],
+            "memberof": ["linux"]
+          },
+          "vmtest02": {
+            "custom_group_var": "All linux group members",
+            "custom_host_var": "Only for vmtest02",
+            "generic": [
+              {"description": "linux", "name": "linux"},
+              {"description": "Ungrouped Hosts", "name": "ungrouped"}
+            ],
+            "global_var_1": "This variable is available to all hosts",
+            "global_var_2": "And also this one",
+            "group_types": ["generic", "linux_distribution"],
+            "linux_distribution": [{"description": "RedHat 7", "name": "redhat_7"}],
+            "memberof": ["redhat_7", "linux"]
+          }
+        }
+      }
+    }
+
+The script has the ability of let user override the loaded data using passing
+a YAML document as environment variable. The document will be treated as the
+last imported document and as such it has the highest priority over the others.
+"""
 
 
 from __future__ import print_function
@@ -125,6 +123,7 @@ import glob
 import time
 import copy
 import json
+import yaml
 try:
     import StringIO
 except ImportError:
@@ -132,6 +131,10 @@ except ImportError:
 from autolibs.utils.execute import *
 from autolibs.utils.formatting import *
 from autolibs.ansible.repository import *
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
 
 
 class YAMLInventory(object):
@@ -160,6 +163,9 @@ class YAMLInventory(object):
         # the cache is older than X minutes (inventory changes are not frequent)
         load_cache = os.path.exists(self.cache_file) and \
                      (time.time() - os.path.getmtime(self.cache_file)) < self.CACHE_EXPIRE
+
+        # FIXME: Cache temporarily disabled
+        load_cache = False
 
         if load_cache:
             try:
@@ -301,7 +307,7 @@ class YAMLInventory(object):
                 fp = StringIO.StringIO(use_yaml)
             else:
                 fp = open(paths_full(self.inventory_base, file_path), "r")
-            yaml_docs = yaml.load_all(fp, Loader=yaml.CLoader)
+            yaml_docs = yaml.load_all(fp)
 
             for doc in yaml_docs:
                 # Check the expected format
@@ -392,6 +398,9 @@ class YAMLInventory(object):
         """
         Checks the format of each YAML entry, to ensure it's in the correct format
         """
+        if not isinstance(doc, dict):
+            raise Exception("The root YAML file must be a dictionary, in %s." % file_path)
+
         if not isinstance(doc.get("import", []) or [], list):
             raise Exception("The key 'import' must be a list, in %s." % file_path)
 

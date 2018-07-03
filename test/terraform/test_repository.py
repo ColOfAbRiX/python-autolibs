@@ -30,6 +30,7 @@ from mock import patch
 
 import os
 from autolibs.terraform import TerraformRepo
+from autolibs.utils.common import get_builtins_ref
 
 
 class TerraformConfigMock:
@@ -128,12 +129,12 @@ class TerraformRepoTest(unittest.TestCase):
 
     """ environments() """
 
-    @patch('__builtin__.next', return_value=[[], ["dir_1", "dir_2"]])
+    @patch(get_builtins_ref() + '.next', return_value=[[], ["dir_1", "dir_2"]])
     def test_list_environments(self, *args):
         result = self.buildTFRepo().environments()
         self.assertListEqual(result, ["dir_1", "dir_2"])
 
-    @patch('__builtin__.next', return_value=[[], []])
+    @patch(get_builtins_ref() + '.next', return_value=[[], []])
     def test_list_empty_envs(self, *args):
         result = self.buildTFRepo().environments()
         self.assertListEqual(result, [])

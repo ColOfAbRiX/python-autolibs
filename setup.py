@@ -55,7 +55,9 @@ setup(
     install_requires=[
         'mock',
         'boto3',
-        'colored',
+        'psutil',
+        'PyYAML',
+        'colored'   ,
         'pycrypto',
         'GitPython',
         'configparser2',

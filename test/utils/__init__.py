@@ -23,10 +23,4 @@
 # SOFTWARE.
 #
 
-from .formatting import *
-from .gitutils import *
-from .execute import *
-from .common import *
-from .debug import *
-
 # vim: ft=python:ts=4:sw=4

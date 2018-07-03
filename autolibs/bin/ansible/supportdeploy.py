@@ -32,6 +32,7 @@ import sys
 import glob
 import argparse
 
+from autolibs.utils.common import *
 from autolibs.utils.execute import *
 from autolibs.utils.formatting import print_c
 from autolibs.ansible.deploy import DeployConfig
@@ -42,6 +43,8 @@ def ansible_playbook_options():
     """
     Lists the options available  for ansible-playbook
     """
+    # TODO: Implement in python the following BASH:
+    #   ansible-playbook -h | egrep -oe ' \-\-[^=,) ]+' -e ' \-[^-=,) ]' | sort | uniq | awk '{ print $1 }'
     ansible_options = [
         "--ask-become-pass", "--ask-pass", "--ask-su-pass", "--ask-sudo-pass",
         "--ask-vault-pass", "--become", "--become-method", "--become-user",

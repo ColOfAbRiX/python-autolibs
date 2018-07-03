@@ -43,7 +43,7 @@ def main():
     args = parser.parse_args()
 
     # Find the list of regions
-    regions = filter(None, args.regions.lower().split(','))
+    regions = list(filter(None, args.regions.lower().split(',')))
     if not regions:
         regions = [x['RegionName'] for x in boto3.client('ec2').describe_regions()['Regions']]
 

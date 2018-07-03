@@ -24,11 +24,14 @@
 #
 
 from __future__ import print_function
+import sys
+import six
 import crypt
 import random
 import string
 from operator import *
 from itertools import *
+from packaging import version
 try:
     import json
 except ImportError:
@@ -78,7 +81,7 @@ def group_by(data, group_by=[], **aggregators):
 
         # Aggregators
         grp = list(grp)
-        for field, function in aggregators.iteritems():
+        for field, function in six.iteritems(aggregators):
             partial[field] = function(grp)
 
         result.append(partial)
@@ -134,7 +137,7 @@ def merge(a, b):
     result = a.copy()
 
     # next, iterate over b keys and values
-    for k, v in b.iteritems():
+    for k, v in six.iteritems(b):
         # if there's already such key in a
         # and that key contains a MutableMapping
         if k in result and isinstance(result[k], dict) and isinstance(v, dict):
@@ -164,5 +167,14 @@ def sha512_crypt(password, rounds):
     rounds = max(1000, min(999999999, rounds or 5000))
     prefix = '$6$rounds={0}$'.format(rounds)
     return crypt.crypt(password, prefix + random_string(8))
+
+
+def get_builtins_ref():
+    """
+    Returns the name for "builtins" based on the version of python
+    """
+    if sys.version_info >= (3, 2):
+        return "builtins"
+    return "__builtin__"
 
 # vim: ft=python:ts=4:sw=4

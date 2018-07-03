@@ -30,6 +30,7 @@ from mock import patch, mock_open
 
 import os
 from autolibs.ansible import AnsibleRepo
+from autolibs.utils.common import get_builtins_ref
 
 
 class AnsibleConstsMock:
@@ -441,7 +442,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('os.walk')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_vaulted_no_vaults(self, mock_open, mock_walk):
         mock_open.return_value = string_io('Content 1', 'Content 21\nContent 22', 'Content 3')
         mock_walk.return_value = [
@@ -457,7 +458,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('os.walk')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_vaulted_cannot_open(self, mock_open, mock_walk):
         mock_walk.return_value = []
         mock_open.side_effect = IOError()
@@ -485,7 +486,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('os.walk')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_vaulted_vaulted(self, mock_open, mock_walk):
         mock_open.return_value = string_io('$ANSIBLE_VAULT;1.1;AES256', 'Content 2', '$ANSIBLE_VAULT;1.1;AES256')
         mock_walk.return_value = [
@@ -518,7 +519,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('glob.glob')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_tags_cannot_open(self, mock_open, mock_glob):
         mock_glob.return_value = []
         mock_open.side_effect = IOError()
@@ -532,7 +533,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('glob.glob')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_tags_badyaml_content(self, mock_open, mock_glob):
         mock_open.return_value = string_io('not_a_yaml_content')
         mock_glob.return_value = ['file_1.yml']
@@ -546,7 +547,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('glob.glob')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_tags_notags(self, mock_open, mock_glob):
         mock_open.return_value = string_io('- {name: missing tags}')
         mock_glob.return_value = ['file_1.yml']
@@ -560,7 +561,7 @@ class AnsibleRepoTest(unittest.TestCase):
         self.assertListEqual(result, expected)
 
     @patch('glob.glob')
-    @patch('__builtin__.open')
+    @patch(get_builtins_ref() + '.open')
     def test_tags_tags(self, mock_open, mock_glob):
         mock_open.return_value = string_io(
             '[{tags: [tag_1, tag_2]}, {name: no tags here}, {tags: tags_3}]'
@@ -581,9 +582,15 @@ def string_io(*texts):
     Using a StringIO so I can mock open. Found this trick here:
     https://stackoverflow.com/questions/12028637/pythons-stringio-doesnt-do-well-with-with-statements
     """
-    from StringIO import StringIO
-    StringIO.__exit__ = lambda *args: args[0]
-    StringIO.__enter__ = lambda *args: args[0]
-    return StringIO(unicode('\n'.join(texts), 'utf-8'))
+    import six
+    if six.PY2:
+        from StringIO import StringIO
+        StringIO.__exit__ = lambda *args: args[0]
+        StringIO.__enter__ = lambda *args: args[0]
+        return StringIO(unicode('\n'.join(texts), 'utf-8'))
+    elif six.PY3:
+        from io import StringIO
+        return StringIO('\n'.join(texts))
+
 
 # vim: ft=python:ts=4:sw=4

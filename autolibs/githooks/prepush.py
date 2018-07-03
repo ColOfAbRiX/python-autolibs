@@ -30,13 +30,14 @@ import os
 import sys
 import psutil
 
+from autolibs.config import Config
+from autolibs.utils.common import *
 from autolibs.utils.execute import *
 from autolibs.utils.gitutils import *
-from autolibs.config import Config
-from packer import prepush as packer
-from autolibs.utils.formatting import print_c
-from ansible import prepush as ansible
 from autolibs.repository import RepoInfo
+from autolibs.utils.formatting import print_c
+from packer import prepush as packer
+from ansible import prepush as ansible
 from terraform import prepush as terraform
 
 

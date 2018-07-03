@@ -25,6 +25,7 @@
 from __future__ import print_function
 
 import re
+import six
 import json
 import tempfile
 
@@ -68,7 +69,7 @@ def tfstate_resources(tfstate, *resource_regexes):
     result = {}
 
     for module in tfstate['modules']:
-        for res_name, res_content in module['resources'].iteritems():
+        for res_name, res_content in six.iteritems(module['resources']):
             for regex in resource_regexes:
                 if re.search(regex, res_name):
                     result.update({

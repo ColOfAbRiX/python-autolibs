@@ -1,6 +1,10 @@
 # config file for the automation repository
 # ==============================================
 
+# Usage:
+# Copy this file in the GIT repository root and name it .repoconfig. Uncomment
+# the parameters that you need to configure
+
 [repository]
 # Settings for the repository configuration
 
@@ -24,7 +28,7 @@
 # Ansible inventories directories
 #inventories_dir = inventories
 
-# Run Ansible as this specific user
+# Run Ansible as this specific user (using sudo)
 #run_as = ansible
 
 # Name of the dynamic inventory script. The deployment wrapper will look in

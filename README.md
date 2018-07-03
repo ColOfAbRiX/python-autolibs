@@ -9,8 +9,10 @@ The toolset defines some standards and a project structure that then is used to 
 - Simplified command lines to run Ansible, just specify the target and the playbook
 - Command line autocompletion for the tools that search on the Ansible code
 - Powerful and clean YAML-based dynamic inventory
-- Clean directory structure to manage different scenarios
-- Management of only one or multiple environments
+  - Support for plug-in inventories
+  - Clean directory structure to manage different scenarios
+  - Management of only one or multiple environments
+  - Support for the two Ansible recommended [directory structures][1]
 - Centralized configuration file for all the tools
 - Security checks for sensitive files (git hooks, file system permissions)
 - Using GIT on your project is the foundation of the tools
@@ -34,12 +36,20 @@ The package installs system wide GIT hooks to perform checks on the repository. 
 - **pre-commit**
 - **pre-push**
 
+[1]: https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout
+
 ## Requirements
 
-The package requires the following additional python packages:
+The package requires the following additional python packages (installed automatically by python):
 
-- **configparser2**
 - **ansible** from version 2.0.0 up to version 2.3.x
+- **boto3**
+- **colored**
+- **configparser2**
+- **GitPython**
+- **mock**
+- **pycrypto**
+- **PyYAML**
 
 ## Installation
 

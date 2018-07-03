@@ -32,6 +32,7 @@ import re
 import sys
 import argparse
 
+from autolibs.utils.common import *
 from autolibs.utils.execute import *
 from autolibs.utils.formatting import print_c
 from autolibs.ansible.deploy import DeployConfig

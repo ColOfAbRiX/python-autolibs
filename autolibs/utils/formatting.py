@@ -72,7 +72,7 @@ def format_json(data):
 
 def format_timedelta(seconds, lookup=None, sep=', '):
     """
-    Formats a timedelta into a human readable expanded format with a precusion up to microsecond
+    Formats a timedelta into a human readable expanded format with a precision up to microsecond
     """
     if lookup is None:
         loopkup = [
@@ -83,7 +83,7 @@ def format_timedelta(seconds, lookup=None, sep=', '):
             {'divider': 60,   'format': '{0:.0f} {1}', 'unit': 'hour', 'units': 'hours',  'value': 0},
             {'divider': 24,   'format': '{0:.0f} {1}', 'unit': 'day',  'units': 'days',   'value': 0},
             {'divider': 7,    'format': '{0:.0f} {1}', 'unit': 'week', 'units': 'weeks',  'value': 0},
-            {'divider': 4.348214, 'format': '{0:.0f} {1}', 'unit': 'month', 'units': 'months', 'value': 0},
+            {'divider': 30.4375, 'format': '{0:.0f} {1}', 'unit': 'month', 'units': 'months', 'value': 0},
             {'divider': 12,   'format': '{0:.0f} {1}', 'unit': 'year',  'units': 'years', 'value': 0},
         ]
 
